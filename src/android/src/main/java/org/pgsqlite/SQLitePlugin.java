@@ -12,10 +12,10 @@ import android.app.Activity;
 import android.app.Application;
 import android.database.Cursor;
 import android.database.CursorWindow;
-import android.database.sqlite.SQLiteCursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteException;
-import android.database.sqlite.SQLiteStatement;
+import net.sqlcipher.database.SQLiteCursor;
+import net.sqlcipher.database.SQLiteDatabase;
+import net.sqlcipher.database.SQLiteException;
+import net.sqlcipher.database.SQLiteStatement;
 import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
@@ -251,13 +251,15 @@ public class SQLitePlugin extends ReactContextBaseJavaModule implements Applicat
 
         JSONObject o;
         String dbname;
+        String dbpwd;
 
         switch (action) {
             case open:
                 o = args.getJSONObject(0);
                 dbname = o.getString("name");
+                dbpwd = o.getString("key");
                 // open database and start reading its queue
-                this.startDatabase(dbname, o, cbc);
+                this.startDatabase(dbname, dbpwd, o, cbc);
                 break;
 
             case close:
@@ -354,7 +356,7 @@ public class SQLitePlugin extends ReactContextBaseJavaModule implements Applicat
      * @param options
      * @param cbc
      */
-    private void startDatabase(String dbname, JSONObject options, CallbackContext cbc) {
+    private void startDatabase(String dbname, String dbpwd, JSONObject options, CallbackContext cbc) {
         // TODO: is it an issue that we can orphan an existing thread?  What should we do here?
         // If we re-use the existing DBRunner it might be in the process of closing...
         DBRunner r = dbrmap.get(dbname);
@@ -366,7 +368,7 @@ public class SQLitePlugin extends ReactContextBaseJavaModule implements Applicat
             // than orphaning the old DBRunner.
             cbc.success("database started");
         } else {
-            r = new DBRunner(dbname, options, cbc);
+            r = new DBRunner(dbname, dbpwd, options, cbc);
             dbrmap.put(dbname, r);
             this.getThreadPool().execute(r);
         }
@@ -380,8 +382,9 @@ public class SQLitePlugin extends ReactContextBaseJavaModule implements Applicat
      * @return
      * @throws Exception
      */
-    private SQLiteDatabase openDatabase(String dbname, boolean createFromAssets, CallbackContext cbc) throws Exception {
+    private SQLiteDatabase openDatabase(String dbname, String key, boolean createFromAssets, CallbackContext cbc) throws Exception {
         try {
+            SQLiteDatabase.loadLibs(activity);
             if (this.getDatabase(dbname) != null) {
                 // this should not happen - should be blocked at the execute("open") level
                 if (cbc != null) cbc.error("database already open");
@@ -398,7 +401,7 @@ public class SQLitePlugin extends ReactContextBaseJavaModule implements Applicat
 
             Log.v("info", "Open sqlite db: " + dbfile.getAbsolutePath());
 
-            SQLiteDatabase mydb = SQLiteDatabase.openOrCreateDatabase(dbfile, null);
+            SQLiteDatabase mydb = SQLiteDatabase.openOrCreateDatabase(dbfile, key, null);
 
             if (cbc != null) // needed for Android locking/closing workaround
                 cbc.success("database open");
@@ -535,18 +538,7 @@ public class SQLitePlugin extends ReactContextBaseJavaModule implements Applicat
     @SuppressLint("NewApi")
     private boolean deleteDatabaseNow(String dbname) {
         File dbfile = this.getActivity().getDatabasePath(dbname);
-        if (android.os.Build.VERSION.SDK_INT >= 11) {
-            // Use try & catch just in case android.os.Build.VERSION.SDK_INT >= 16 was lying:
-            try {
-                return SQLiteDatabase.deleteDatabase(dbfile);
-            } catch (Exception e) {
-                Log.e(SQLitePlugin.class.getSimpleName(), "couldn't delete because old SDK_INT", e);
-                return deleteDatabasePreHoneycomb(dbfile);
-            }
-        } else {
-            // use old API
-            return deleteDatabasePreHoneycomb(dbfile);
-        }
+        return deleteDatabasePreHoneycomb(dbfile);
     }
 
     private boolean deleteDatabasePreHoneycomb(File dbfile) {
@@ -992,6 +984,7 @@ public class SQLitePlugin extends ReactContextBaseJavaModule implements Applicat
 
     private class DBRunner implements Runnable {
         final String dbname;
+        final String dbpwd;
         private boolean createFromAssets;
         private boolean androidLockWorkaround;
         final BlockingQueue<DBQuery> q;
@@ -999,8 +992,9 @@ public class SQLitePlugin extends ReactContextBaseJavaModule implements Applicat
 
         SQLiteDatabase mydb;
 
-        DBRunner(final String dbname, JSONObject options, CallbackContext cbc) {
+        DBRunner(final String dbname, final String dbpwd, JSONObject options, CallbackContext cbc) {
             this.dbname = dbname;
+            this.dbpwd = dbpwd;
             this.createFromAssets = options.has("createFromResource");
             this.androidLockWorkaround = options.has("androidLockWorkaround");
             if (this.androidLockWorkaround)
@@ -1012,7 +1006,7 @@ public class SQLitePlugin extends ReactContextBaseJavaModule implements Applicat
 
         public void run() {
             try {
-                this.mydb = openDatabase(dbname, this.createFromAssets, this.openCbc);
+                this.mydb = openDatabase(dbname, dbpwd, this.createFromAssets, this.openCbc);
             } catch (Exception e) {
                 Log.e(SQLitePlugin.class.getSimpleName(), "unexpected error, stopping db thread", e);
                 dbrmap.remove(dbname);
@@ -1031,7 +1025,7 @@ public class SQLitePlugin extends ReactContextBaseJavaModule implements Applicat
                     if (androidLockWorkaround && dbq.queries.length == 1 && dbq.queries[0].equals("COMMIT")) {
                         // Log.v(SQLitePlugin.class.getSimpleName(), "close and reopen db");
                         closeDatabaseNow(dbname);
-                        this.mydb = openDatabase(dbname, false, null);
+                        this.mydb = openDatabase(dbname, dbpwd, false, null);
                         // Log.v(SQLitePlugin.class.getSimpleName(), "close and reopen db finished");
                     }
 

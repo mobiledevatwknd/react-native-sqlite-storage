@@ -25,9 +25,7 @@ var {
 } = React;
 
 var database_name = "Test.db";
-var database_version = "1.0";
-var database_displayname = "SQLite Test Database";
-var database_size = 200000;
+var database_key = "password";
 var db;
 
 var SQLiteDemo = React.createClass({
@@ -165,7 +163,7 @@ var SQLiteDemo = React.createClass({
         var that = this;
         that.state.progress.push("Opening database ...");
         that.setState(that.state);
-        SQLite.openDatabase(database_name, database_version, database_displayname, database_size).then((DB) => {
+        SQLite.openDatabase({'name': database_name, 'key': database_key}).then((DB) => {
             db = DB;
             that.state.progress.push("Database OPEN");
             that.setState(that.state);
