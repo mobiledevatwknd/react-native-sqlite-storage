@@ -1,7 +1,5 @@
-# react-native-sqlite-storage
-SQLite3 Native Plugin for React Native for both Android (Classic and Native) and iOS
-
-Inspired by fantastic work done by Chris Brody I did not want to re-invent the wheel. The original Cordova plugin was written so well and adhered to latest WebSQL API that there was no need to come up with anything much different. So the Cordova plugin was ported to React Native.
+# react-native-sqlcipher-storage
+SQLCipher plugin for React Native. Based on the hard work already put in on the react-native-sqlite-storage project and on cordova-sqlcipher-adapter, this is a minor change to the former in order to use the sqlcipher backend from the latter.
 
 Features:
   1. iOS and Android supported via identical JavaScript API.
@@ -10,35 +8,13 @@ Features:
   4. JavaScript interface via plain callbacks or Promises.
   5. Pre-populated SQLite database import from application sandbox
 
-Please let me know your projects that use these SQLite React Native modules. I will list them in the reference section. If there are any features that you think would benefit this library please post them.
-
-The library had been developed for React 14 using XCode 6. It has been tested with React 0.18.1 and XCode 7 - it works fine out of the box without any need for tweaks or code changes. For XCode 7 the only difference is that sqlite ios library name suffix is tbd instead of dylib.
-
-#Version History
-
-v2.1.3
- 1. Fix the runtime error in reflection.
-
-v2.1.2
- 1. Android Native SQLite connectivity
- 2. Change how React parameters are processed to map a Number to Java Double
- 3. Implent hooks for activity lifecycle and automatic db closing on destroy
- 4. Fix How To Get Started instructions for Android
-
-v2.1.1 - Fixes issues with XCode path and React Native version compatibility
-
-v2.1 - Android support
-
-v2.0 - Full support for Promise API. Backward compatible with Callbacks.
-
-v1.0 - Intial release for iOS with full support of all operations based on plan JavaScript callbacks.
 
 #How to use (iOS):
 
 #### Step 1. NPM install
 
 ```shell
-npm install --save react-native-sqlite-storage
+npm install --save react-native-sqlcipher-storage
 ```
 
 #### Step 2. XCode SQLite project dependency set up
@@ -49,19 +25,19 @@ Drag the SQLite Xcode project as a dependency project into your React Native XCo
 
 #### Step 3. XCode SQLite libraries dependency set up
 
-Add libSQLite.a (from Workspace location) to the required Libraries and Frameworks. Also add sqlite3.0.tbd (XCode 7) or libsqlite3.0.dylib (XCode 6 and earlier) in the same fashion using Required Libraries view (Do not just add them manually as the build paths will not be properly set)
+Add libSQLite.a (from Workspace location) to the required Libraries and Frameworks. Also add Security.framework (XCode 7) in the same fashion using Required Libraries view (Do not just add them manually as the build paths will not be properly set)
 
 ![alt tag](https://raw.github.com/andpor/react-native-sqlite-storage/master/instructions/addlibs.png)
 
 #### Step 4. Application JavaScript require
 
-Add var SQLite = require('react-native-sqlite-storage') to your index.ios.js
+Add var SQLite = require('react-native-sqlcipher-storage') to your index.ios.js
 
 ![alt tag](https://raw.github.com/andpor/react-native-sqlite-storage/master/instructions/require.png)
 
-#### Step 5. Applicatin JavaScript code using the SQLite plugin
+#### Step 5. Application JavaScript code using the SQLite plugin
 
-Add JS application code to use SQLite API in your index.ios.js etc. Here is some sample code. For full working example see test/index.ios.callback.js. Please note that Promise based API is now supported as well with full examples in the working React Native app under test/index.ios.promise.js
+Add JS application code to use SQLite API in your index.ios.js etc. Here is some sample code. For full working example see test/TestRunner/index.ios.js.
 
 ```javascript
 errorCB(err) {
@@ -76,13 +52,13 @@ openCB() {
   console.log("Database OPENED");
 },
 
-var db = SQLite.openDatabase("test.db", "1.0", "Test Database", 200000, openCB, errorCB);
+var db = SQLite.openDatabase({"name": "test.db", "key": "password"}, openCB, errorCB);
 db.transaction((tx) => {
   tx.executeSql('SELECT * FROM Employees a, Departments b WHERE a.department = b.department_id', [], (tx, results) => {
       console.log("Query completed");
-      
+
       // Get rows with Web SQL Database spec compliance.
-      
+
       var len = results.rows.length;
       for (let i = 0; i < len; i++) {
         let row = results.rows.item(i);
@@ -90,7 +66,7 @@ db.transaction((tx) => {
       }
 
       // Alternatively, you can use the non-standard raw method.
-      
+
       /*
         let rows = results.rows.raw(); // shallow copy of rows Array
 
@@ -105,7 +81,7 @@ db.transaction((tx) => {
 #### Step 1 - NPM Install
 
 ```shell
-npm install --save react-native-sqlite-storage
+npm install --save react-native-sqlcipher-storage
 ```
 #### Step 2 - Update Gradle Settings
 
@@ -114,7 +90,7 @@ npm install --save react-native-sqlite-storage
 ...
 
 include ':react-native-sqlite-storage'
-project(':react-native-sqlite-storage').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-sqlite-storage/src/android')
+project(':react-native-sqlite-storage').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-sqlcipher-storage/src/android')
 ```
 
 #### Step 3 - Update app Gradle Build
@@ -125,7 +101,7 @@ project(':react-native-sqlite-storage').projectDir = new File(rootProject.projec
 
 dependencies {
     ...
-    compile project(':react-native-sqlite-storage')
+    compile project(':react-native-sqlcipher-storage')
 }
 ```
 
@@ -167,7 +143,7 @@ import org.pgsqlite.SQLitePluginPackage;
 
 public class MainActivity extends ReactActivity {
   ......
-  
+
   /**
    * A list of packages used by the app. If the app uses additional views
    * or modules besides the default ones, add more packages here.
@@ -187,7 +163,7 @@ public class MainActivity extends ReactActivity {
 // file: index.android.js
 
 var React = require('react-native');
-var SQLite = require('react-native-sqlite-storage')
+var SQLite = require('react-native-sqlcipher-storage')
 ...
 ```
 
@@ -231,11 +207,16 @@ Modify you openDatabase call in your application adding createFromLocation param
 ```
 
 Enjoy!
+#Original react-native-sqlite-storage plugin from andpor
+https://github.com/andpor/react-native-sqlite-storage
 
 #Original Cordova SQLite Bindings from Chris Brody
 https://github.com/litehelpers/Cordova-sqlite-storage
 
-The issues and limitations for the actual SQLite can be found on this site.
+#Cordova SQLCipher Bindings from Chris Brody
+https://github.com/litehelpers/Cordova-sqlcipher-adapter
+
+The issues and limitations for the actual SQLite can be found on these sites.
 
 ##Issues
 

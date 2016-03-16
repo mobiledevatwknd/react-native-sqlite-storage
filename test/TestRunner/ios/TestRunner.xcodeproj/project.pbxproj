@@ -22,8 +22,8 @@
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		146834051AC3E58100842450 /* libReact.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 146834041AC3E56700842450 /* libReact.a */; };
 		832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 832341B51AAA6A8300B99B32 /* libRCTText.a */; };
-		8D599B891C9893FE00170CA4 /* libSQLite.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8D599B881C9893E000170CA4 /* libSQLite.a */; };
 		8D599BA71C999FA100170CA4 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8D599BA61C999FA100170CA4 /* Security.framework */; };
+		8D599BAE1C99B0D700170CA4 /* libSQLite.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8D599BAD1C99B0C300170CA4 /* libSQLite.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -104,9 +104,9 @@
 			remoteGlobalIDString = 58B5119B1A9E6C1200147676;
 			remoteInfo = RCTText;
 		};
-		8D599B871C9893E000170CA4 /* PBXContainerItemProxy */ = {
+		8D599BAC1C99B0C300170CA4 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 8D599B831C9893E000170CA4 /* SQLite.xcodeproj */;
+			containerPortal = 8D599BA81C99B0C300170CA4 /* SQLite.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = E23D7B471ACEFE2A00C59171;
 			remoteInfo = SQLite;
@@ -135,9 +135,9 @@
 		146833FF1AC3E56700842450 /* React.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = React.xcodeproj; path = "../node_modules/react-native/React/React.xcodeproj"; sourceTree = "<group>"; };
 		78C398B01ACF4ADC00677621 /* RCTLinking.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTLinking.xcodeproj; path = "../node_modules/react-native/Libraries/LinkingIOS/RCTLinking.xcodeproj"; sourceTree = "<group>"; };
 		832341B01AAA6A8300B99B32 /* RCTText.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTText.xcodeproj; path = "../node_modules/react-native/Libraries/Text/RCTText.xcodeproj"; sourceTree = "<group>"; };
-		8D599B831C9893E000170CA4 /* SQLite.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SQLite.xcodeproj; path = "../node_modules/react-native-sqlite-storage/src/ios/SQLite.xcodeproj"; sourceTree = "<group>"; };
 		8D599B8A1C98949D00170CA4 /* libsqlite3.0.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.0.tbd; path = usr/lib/libsqlite3.0.tbd; sourceTree = SDKROOT; };
 		8D599BA61C999FA100170CA4 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		8D599BA81C99B0C300170CA4 /* SQLite.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SQLite.xcodeproj; path = "../node_modules/react-native-sqlcipher-storage/src/ios/SQLite.xcodeproj"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -152,8 +152,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8D599BAE1C99B0D700170CA4 /* libSQLite.a in Frameworks */,
 				8D599BA71C999FA100170CA4 /* Security.framework in Frameworks */,
-				8D599B891C9893FE00170CA4 /* libSQLite.a in Frameworks */,
 				146834051AC3E58100842450 /* libReact.a in Frameworks */,
 				00C302E51ABCBA2D00DB3ED1 /* libRCTActionSheet.a in Frameworks */,
 				00C302E71ABCBA2D00DB3ED1 /* libRCTGeolocation.a in Frameworks */,
@@ -276,7 +276,7 @@
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
-				8D599B831C9893E000170CA4 /* SQLite.xcodeproj */,
+				8D599BA81C99B0C300170CA4 /* SQLite.xcodeproj */,
 				146833FF1AC3E56700842450 /* React.xcodeproj */,
 				00C302A71ABCB8CE00DB3ED1 /* RCTActionSheet.xcodeproj */,
 				00C302B51ABCB90400DB3ED1 /* RCTGeolocation.xcodeproj */,
@@ -322,10 +322,10 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		8D599B841C9893E000170CA4 /* Products */ = {
+		8D599BA91C99B0C300170CA4 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				8D599B881C9893E000170CA4 /* libSQLite.a */,
+				8D599BAD1C99B0C300170CA4 /* libSQLite.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -437,8 +437,8 @@
 					ProjectRef = 146833FF1AC3E56700842450 /* React.xcodeproj */;
 				},
 				{
-					ProductGroup = 8D599B841C9893E000170CA4 /* Products */;
-					ProjectRef = 8D599B831C9893E000170CA4 /* SQLite.xcodeproj */;
+					ProductGroup = 8D599BA91C99B0C300170CA4 /* Products */;
+					ProjectRef = 8D599BA81C99B0C300170CA4 /* SQLite.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -520,11 +520,11 @@
 			remoteRef = 832341B41AAA6A8300B99B32 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		8D599B881C9893E000170CA4 /* libSQLite.a */ = {
+		8D599BAD1C99B0C300170CA4 /* libSQLite.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
 			path = libSQLite.a;
-			remoteRef = 8D599B871C9893E000170CA4 /* PBXContainerItemProxy */;
+			remoteRef = 8D599BAC1C99B0C300170CA4 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
