@@ -1,0 +1,2 @@
+E:\android-hybrid\Libraries\react-native-sqlite-storage\src\windows\SQLite3-WinRT\SQLite3\SQLCipher\SQLCipher\SQLCipher.vcxproj;x86
+E:\android-hybrid\Libraries\react-native-sqlite-storage\test\TestRunner\TestRunner\TestRunner.jsproj;x86
