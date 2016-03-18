@@ -187,7 +187,7 @@ comes from here, (https://github.com/Microsoft/openssl/)
 #### Add SqlCipher to your windows project
 1. File -> Add -> Existing Project
 2. Select project in src\windows\SQLite3-WinRT\SQLite3\SqlCipher\SqlCipher\SQLCipher.vcxproj
-3. In your main windows universal application, Select References and add SqlCipher 
+3. In your main windows universal application, Select References and add SqlCipher
 4. The webpack process will not bundle the file in src\windows\SQLite3-WinRT\SQLite3JS. Add that file to your visual studio project and to the html file that drives the project.
 
 # TestRunner
@@ -211,9 +211,3 @@ https://github.com/litehelpers/Cordova-sqlite-storage
 https://github.com/litehelpers/Cordova-sqlcipher-adapter
 
 The issues and limitations for the actual SQLite can be found on these sites.
-
-##Issues
-
-1. Android binds all numeric SQL input values to double. This is due to the underlying React Native limitation where only a Numeric type is available on the interface point making it ambiguous to distinguish intgeres from doubles. Once I figure out the proper way to do this I will update the codebase [(Issue #4141)] (https://github.com/facebook/react-native/issues/4141).
-2. Automatic close for the database when main activity is destroyed is implemented in the pure Java Android version which is most likely to be obsoleted in the near future leaving native impl only.
-3. There seem to be some issues with the native implementation for iPhone related to XCode 7. I hope to be able to resolve this sooner rather than later.
