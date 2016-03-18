@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "node node_modules/react-native/local-cli/cli.js start"
+    "start": "node node_modules/react-native/local-cli/cli.js start",
+    "postinstall": "cd node_modules/react-native/packager && patch -N < ../../../mods.diff || exit 0"
   },
   "dependencies": {
     "react-native": "^0.21.0",
