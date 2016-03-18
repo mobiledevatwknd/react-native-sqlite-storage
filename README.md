@@ -169,9 +169,10 @@ var SQLite = require('react-native-sqlcipher-storage')
 #How to use (Windows Universal Platform):
 Preceding steps
 Its assumed you have a winjs project and have done the following
-
+```shell
 npm install -g react-native-winjs-cli
 react-native-winjs init
+```
 
 #### Step 1 - NPM Install
 ```shell
@@ -186,7 +187,7 @@ comes from here, (https://github.com/Microsoft/openssl/)
 #### Add SqlCipher to your windows project
 1. File -> Add -> Existing Project
 2. Select project in src\windows\SQLite3-WinRT\SQLite3\SqlCipher\SqlCipher\SQLCipher.vcxproj
-3. In your main windows universal application, Select References and add SqlCipher to import junit.framework.TestCase;
+3. In your main windows universal application, Select References and add SqlCipher 
 4. The webpack process will not bundle the file in src\windows\SQLite3-WinRT\SQLite3JS. Add that file to your visual studio project and to the html file that drives the project.
 
 # TestRunner
