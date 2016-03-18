@@ -166,45 +166,38 @@ var React = require('react-native');
 var SQLite = require('react-native-sqlcipher-storage')
 ...
 ```
+#How to use (Windows Universal Platform):
+Preceding steps
+Its assumed you have a winjs project and have done the following
 
-## Setting up your project to import a pre-populated SQLite database from application for iOS
+npm install -g react-native-winjs-cli
+react-native-winjs init
 
-#### Step 1 - Create 'www' folder.
-
-Create a folder called 'www' (yes must be called precisely that else things won't work) in the project folder via Finder
-
-#### Step 2 - Create the database file
-
-Copy/paste your pre-populated database file into the 'www' folder. Give it the same name you are going to use in openDatabase call in your application
-
-#### Step 3 - Add file to project
-
-in XCode, right click on the main folder and select Add Files to 'your project name'
-
-![alt tag](https://raw.github.com/andpor/react-native-sqlite-storage/master/instructions/addFilesToProject.png)
-
-#### Step 4 - Choose files to add
-
-In the Add Files dialog, navigate to the 'www' directory you created in Step 1, select it, make sure you check the option to Create Folder Reference
-
-![alt tag](https://raw.github.com/andpor/react-native-sqlite-storage/master/instructions/addFilesToProjectSelect.png)
-
-#### Step 5 - Verify project structure
-
-Ensure your project structure after previous steps are executed looks like this
-
-![alt tag](https://raw.github.com/andpor/react-native-sqlite-storage/master/instructions/projectStructureAfter.png)
-
-### Step 6 - Adjust openDatabase call
-
-Modify you openDatabase call in your application adding createFromLocation param. If you named your database file in step 2 'testDB' the openDatabase call should look like something like this:
-```js
-
-  ...
-  SQLite.openDatabase({name : "testDB", createFromLocation : 1}, okCallback,errorCallback);
-  ...
+#### Step 1 - NPM Install
+```shell
+npm install --save react-native-sqlcipher-storage
 
 ```
+
+#### Step 2 - Build OpenSSL
+Follow the instructions in src\windows\SQLite3-WinRT\SQLite3\openssl-WinRt\INSTALL.WINUNIVERSAL
+comes from here, (https://github.com/Microsoft/openssl/)
+
+#### Add SqlCipher to your windows project
+1. File -> Add -> Existing Project
+2. Select project in src\windows\SQLite3-WinRT\SQLite3\SqlCipher\SqlCipher\SQLCipher.vcxproj
+3. In your main windows universal application, Select References and add SqlCipher to import junit.framework.TestCase;
+4. The webpack process will not bundle the file in src\windows\SQLite3-WinRT\SQLite3JS. Add that file to your visual studio project and to the html file that drives the project.
+
+# TestRunner
+
+in test/TestRunner there is an example ready to go. From that directory do :
+
+1. npm install
+2. android : react-native run-android
+3. ios : react-native run-ios
+4. windows : (After building OpenSSL); open src\windows\SQLite3-WinRT\SQLite3\SqlCipher\SqlCipher.sln. Run the TestRunner app
+
 
 Enjoy!
 #Original react-native-sqlite-storage plugin from andpor
