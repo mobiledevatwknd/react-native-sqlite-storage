@@ -54,7 +54,7 @@
 /******/ 	
 /******/ 	
 /******/ 	var hotApplyOnUpdate = true;
-/******/ 	var hotCurrentHash = "7e803a0b2193ae97fbc6"; // eslint-disable-line no-unused-vars
+/******/ 	var hotCurrentHash = "576df0fa9b22a6f8b967"; // eslint-disable-line no-unused-vars
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentParents = []; // eslint-disable-line no-unused-vars
 /******/ 	
@@ -555,337 +555,29 @@
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/*
-	 * sqlite.ios.promise.js
-	 *
-	 * Created by Andrzej Porebski on 10/29/15.
-	 * Copyright (c) 2015 Andrzej Porebski.
-	 *
-	 * Test App using Promise for react-naive-sqlite-storage
-	 *
-	 * This library is available under the terms of the MIT License (2008).
-	 * See http://opensource.org/licenses/alphabetical for full text.
-	 */
 	'use strict';
 	
-	var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i['return']) _i['return'](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError('Invalid attempt to destructure non-iterable instance'); } }; })();
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 	
 	var _reactNative = __webpack_require__(2);
 	
-	var React = __webpack_require__(2);
-	var SQLite = __webpack_require__(335);
-	SQLite.DEBUG(true);
-	SQLite.enablePromise(true);
+	var _reactNative2 = _interopRequireDefault(_reactNative);
 	
-	var AppRegistry = React.AppRegistry;
-	var StyleSheet = React.StyleSheet;
-	var Text = React.Text;
-	var View = React.View;
-	var ListView = React.ListView;
-	var TouchableOpacity = React.TouchableOpacity;
+	var _sqlitedemo = __webpack_require__(335);
 	
-	var database_name = "Test.db";
-	var database_key = "password";
-	var db;
+	var _sqlitedemo2 = _interopRequireDefault(_sqlitedemo);
 	
-	var SQLiteDemo = React.createClass({
-	    displayName: 'SQLiteDemo',
-	
-	    getInitialState: function getInitialState() {
-	        return {
-	            progress: [],
-	            dataSource: new ListView.DataSource({
-	                rowHasChanged: function rowHasChanged(row1, row2) {
-	                    row1 !== row2;
-	                }
-	            })
-	        };
-	    },
-	
-	    componentWillUnmount: function componentWillUnmount() {
-	        this.closeDatabase();
-	    },
-	
-	    errorCB: function errorCB(err) {
-	        console.log("error: ", err);
-	        this.state.progress.push("Error " + (err.message || err));
-	        this.setState(this.state);
-	    },
-	
-	    populateDatabase: function populateDatabase(db) {
-	        var that = this;
-	        that.state.progress.push("Database integrity check");
-	        that.setState(that.state);
-	        db.executeSql('SELECT 1 FROM Version LIMIT 1').then(function () {
-	            that.state.progress.push("Database is ready ... executing query ...");
-	            that.setState(that.state);
-	            db.transaction(that.queryEmployees).then(function () {
-	                that.state.progress.push("Processing completed");
-	                that.setState(that.state);
-	            });
-	        })['catch'](function (error) {
-	            console.log("Received error: ", error);
-	            that.state.progress.push("Database not yet ready ... populating data");
-	            that.setState(that.state);
-	            db.transaction(that.populateDB).then(function () {
-	                that.state.progress.push("Database populated ... executing query ...");
-	                that.setState(that.state);
-	                db.transaction(that.queryEmployees).then(function (result) {
-	                    console.log("Transaction is now finished");
-	                    that.state.progress.push("Processing completed");
-	                    that.setState(that.state);
-	                    that.closeDatabase();
-	                });
-	            });
-	        });
-	    },
-	
-	    populateDB: function populateDB(tx) {
-	        var that = this;
-	        this.state.progress.push("Executing DROP stmts");
-	        this.setState(this.state);
-	
-	        tx.executeSql('DROP TABLE IF EXISTS Employees;');
-	        tx.executeSql('DROP TABLE IF EXISTS Offices;');
-	        tx.executeSql('DROP TABLE IF EXISTS Departments;');
-	
-	        this.state.progress.push("Executing CREATE stmts");
-	        this.setState(this.state);
-	
-	        tx.executeSql('CREATE TABLE IF NOT EXISTS Version( ' + 'version_id INTEGER PRIMARY KEY NOT NULL); ')['catch'](function (error) {
-	            that.errorCB(error);
-	        });
-	
-	        tx.executeSql('CREATE TABLE IF NOT EXISTS Departments( ' + 'department_id INTEGER PRIMARY KEY NOT NULL, ' + 'name VARCHAR(30) ); ')['catch'](function (error) {
-	            that.errorCB(error);
-	        });
-	
-	        tx.executeSql('CREATE TABLE IF NOT EXISTS Offices( ' + 'office_id INTEGER PRIMARY KEY NOT NULL, ' + 'name VARCHAR(20), ' + 'longtitude FLOAT, ' + 'latitude FLOAT ) ; ')['catch'](function (error) {
-	            that.errorCB(error);
-	        });
-	
-	        tx.executeSql('CREATE TABLE IF NOT EXISTS Employees( ' + 'employe_id INTEGER PRIMARY KEY NOT NULL, ' + 'name VARCHAR(55), ' + 'office INTEGER, ' + 'department INTEGER, ' + 'FOREIGN KEY ( office ) REFERENCES Offices ( office_id ) ' + 'FOREIGN KEY ( department ) REFERENCES Departments ( department_id ));')['catch'](function (error) {
-	            that.errorCB(error);
-	        });
-	
-	        this.state.progress.push("Executing INSERT stmts");
-	        this.setState(this.state);
-	
-	        tx.executeSql('INSERT INTO Departments (name) VALUES ("Client Services");');
-	        tx.executeSql('INSERT INTO Departments (name) VALUES ("Investor Services");');
-	        tx.executeSql('INSERT INTO Departments (name) VALUES ("Shipping");');
-	        tx.executeSql('INSERT INTO Departments (name) VALUES ("Direct Sales");');
-	
-	        tx.executeSql('INSERT INTO Offices (name, longtitude, latitude) VALUES ("Denver", 59.8,  34.1);');
-	        tx.executeSql('INSERT INTO Offices (name, longtitude, latitude) VALUES ("Warsaw", 15.7, 54.1);');
-	        tx.executeSql('INSERT INTO Offices (name, longtitude, latitude) VALUES ("Berlin", 35.3, 12.1);');
-	        tx.executeSql('INSERT INTO Offices (name, longtitude, latitude) VALUES ("Paris", 10.7, 14.1);');
-	
-	        tx.executeSql('INSERT INTO Employees (name, office, department) VALUES ("Sylvester Stallone", 2,  4);');
-	        tx.executeSql('INSERT INTO Employees (name, office, department) VALUES ("Elvis Presley", 2, 4);');
-	        tx.executeSql('INSERT INTO Employees (name, office, department) VALUES ("Leslie Nelson", 3,  4);');
-	        tx.executeSql('INSERT INTO Employees (name, office, department) VALUES ("Fidel Castro", 3, 3);');
-	        tx.executeSql('INSERT INTO Employees (name, office, department) VALUES ("Bill Clinton", 1, 3);');
-	        tx.executeSql('INSERT INTO Employees (name, office, department) VALUES ("Margaret Thatcher", 1, 3);');
-	        tx.executeSql('INSERT INTO Employees (name, office, department) VALUES ("Donald Trump", 1, 3);');
-	        tx.executeSql('INSERT INTO Employees (name, office, department) VALUES ("Dr DRE", 2, 2);');
-	        tx.executeSql('INSERT INTO Employees (name, office, department) VALUES ("Samantha Fox", 2, 1);');
-	        console.log("all config SQL done");
-	    },
-	
-	    queryEmployees: function queryEmployees(tx) {
-	        var that = this;
-	        console.log("Executing employee query");
-	        tx.executeSql('SELECT a.name, b.name as deptName FROM Employees a, Departments b WHERE a.department = b.department_id').then(function (_ref) {
-	            var _ref2 = _slicedToArray(_ref, 2);
-	
-	            var tx = _ref2[0];
-	            var results = _ref2[1];
-	
-	            that.state.progress.push("Query completed");
-	            that.setState(that.state);
-	            var len = results.rows.length;
-	            for (var i = 0; i < len; i++) {
-	                var row = results.rows.item(i);
-	                that.state.progress.push('Empl Name: ' + row.name + ', Dept Name: ' + row.deptName);
-	            }
-	            that.setState(that.state);
-	        })['catch'](function (error) {
-	            console.log(error);
-	        });
-	    },
-	
-	    loadAndQueryDB: function loadAndQueryDB() {
-	        var that = this;
-	        that.state.progress.push("Opening database ...");
-	        that.setState(that.state);
-	        SQLite.openDatabase({ 'name': database_name, 'key': database_key }).then(function (DB) {
-	            db = DB;
-	            that.state.progress.push("Database OPEN");
-	            that.setState(that.state);
-	            that.populateDatabase(DB);
-	        })['catch'](function (error) {
-	            console.log(error);
-	        });
-	    },
-	
-	    closeDatabase: function closeDatabase() {
-	        var that = this;
-	        if (db) {
-	            console.log("Closing database ...");
-	            that.state.progress.push("Closing DB");
-	            that.setState(that.state);
-	            db.close().then(function (status) {
-	                that.state.progress.push("Database CLOSED");
-	                that.setState(that.state);
-	            })['catch'](function (error) {
-	                that.errorCB(error);
-	            });
-	        } else {
-	            that.state.progress.push("Database was not OPENED");
-	            that.setState(that.state);
-	        }
-	    },
-	
-	    deleteDatabase: function deleteDatabase() {
-	        var that = this;
-	        that.state.progress = ["Deleting database"];
-	        that.setState(that.state);
-	        SQLite.deleteDatabase(database_name).then(function () {
-	            console.log("Database DELETED");
-	            that.state.progress.push("Database DELETED");
-	            that.setState(that.state);
-	        })['catch'](function (error) {
-	            that.errorCB(error);
-	        });
-	    },
-	
-	    runDemo: function runDemo() {
-	        console.log("run demo");
-	        this.state.progress = ["Starting SQLite Demo"];
-	        this.setState(this.state);
-	        this.loadAndQueryDB();
-	    },
-	
-	    renderProgressEntry: function renderProgressEntry(entry) {
-	        return React.createElement(
-	            View,
-	            { style: listStyles.li },
-	            React.createElement(
-	                View,
-	                null,
-	                React.createElement(
-	                    Text,
-	                    { style: listStyles.title },
-	                    entry
-	                )
-	            )
-	        );
-	    },
-	
-	    render: function render() {
-	        var ds = new ListView.DataSource({ rowHasChanged: function rowHasChanged(row1, row2) {
-	                row1 !== row2;
-	            } });
-	        return React.createElement(
-	            View,
-	            { style: styles.mainContainer },
-	            React.createElement(
-	                View,
-	                { style: styles.toolbar },
-	                React.createElement(
-	                    Text,
-	                    { style: styles.toolbarButton, onPress: this.runDemo },
-	                    'Run Demo'
-	                ),
-	                React.createElement(
-	                    Text,
-	                    { style: styles.toolbarButton, onPress: this.closeDatabase },
-	                    'Close DB'
-	                ),
-	                React.createElement(
-	                    Text,
-	                    { style: styles.toolbarButton, onPress: this.deleteDatabase },
-	                    'Delete DB'
-	                )
-	            ),
-	            React.createElement(ListView, {
-	                dataSource: ds.cloneWithRows(this.state.progress),
-	                renderRow: this.renderProgressEntry,
-	                style: listStyles.liContainer })
-	        );
-	    }
-	});
-	
-	var listStyles = StyleSheet.create({
-	    li: {
-	        borderBottomColor: '#c8c7cc',
-	        borderBottomWidth: 0.5,
-	        paddingTop: 15,
-	        paddingRight: 15,
-	        paddingBottom: 15
-	    },
-	    liContainer: {
-	        backgroundColor: '#fff',
-	        flex: 1,
-	        paddingLeft: 15
-	    },
-	    liIndent: {
-	        flex: 1
-	    },
-	    liText: {
-	        color: '#333',
-	        fontSize: 17,
-	        fontWeight: '400',
-	        marginBottom: -3.5,
-	        marginTop: -3.5
-	    }
-	});
-	
-	var styles = StyleSheet.create({
-	    container: {
-	        flex: 1,
-	        justifyContent: 'center',
-	        alignItems: 'center',
-	        backgroundColor: '#F5FCFF'
-	    },
-	    welcome: {
-	        fontSize: 20,
-	        textAlign: 'center',
-	        margin: 10
-	    },
-	    instructions: {
-	        textAlign: 'center',
-	        color: '#333333',
-	        marginBottom: 5
-	    },
-	    toolbar: {
-	        backgroundColor: '#51c04d',
-	        paddingTop: 30,
-	        paddingBottom: 10,
-	        flexDirection: 'row'
-	    },
-	    toolbarButton: {
-	        color: 'blue',
-	        textAlign: 'center',
-	        flex: 1
-	    },
-	    mainContainer: {
-	        flex: 1
-	    }
-	});
-	
-	AppRegistry.registerComponent('TestRunner', function () {
-	    return SQLiteDemo;
+	_reactNative.AppRegistry.registerComponent('TestRunner', function () {
+	  return _sqlitedemo2['default'];
 	});
 	
 	if (_reactNative.Platform.OS == 'winjs') {
-	    var app = document.createElement('div');
-	    document.body.appendChild(app);
+	  var app = document.createElement('div');
+	  document.body.appendChild(app);
 	
-	    AppRegistry.runApplication('TestRunner', {
-	        rootTag: app
-	    });
+	  _reactNative.AppRegistry.runApplication('TestRunner', {
+	    rootTag: app
+	  });
 	}
 
 /***/ },
@@ -49714,6 +49406,353 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
+	 * sqlite.ios.promise.js
+	 *
+	 * Created by Andrzej Porebski on 10/29/15.
+	 * Copyright (c) 2015 Andrzej Porebski.
+	 *
+	 * Test App using Promise for react-naive-sqlite-storage
+	 *
+	 * This library is available under the terms of the MIT License (2008).
+	 * See http://opensource.org/licenses/alphabetical for full text.
+	 */
+	'use strict';
+	
+	Object.defineProperty(exports, '__esModule', {
+	    value: true
+	});
+	
+	var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i['return']) _i['return'](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError('Invalid attempt to destructure non-iterable instance'); } }; })();
+	
+	var React = __webpack_require__(2);
+	var SQLite = __webpack_require__(336);
+	SQLite.DEBUG(true);
+	SQLite.enablePromise(true);
+	
+	var AppRegistry = React.AppRegistry;
+	var StyleSheet = React.StyleSheet;
+	var Text = React.Text;
+	var View = React.View;
+	var ListView = React.ListView;
+	var TouchableOpacity = React.TouchableOpacity;
+	
+	var database_name = "Test.db";
+	var database_key = "password";
+	var bad_database_key = "bad";
+	var db;
+	var goodPassword = true;
+	
+	exports['default'] = React.createClass({
+	    displayName: 'sqlitedemo',
+	
+	    getInitialState: function getInitialState() {
+	        return {
+	            progress: [],
+	            dataSource: new ListView.DataSource({
+	                rowHasChanged: function rowHasChanged(row1, row2) {
+	                    row1 !== row2;
+	                }
+	            })
+	        };
+	    },
+	
+	    componentWillUnmount: function componentWillUnmount() {
+	        this.closeDatabase();
+	    },
+	
+	    errorCB: function errorCB(err) {
+	        console.log("error: ", err);
+	        this.state.progress.push("Error " + (err.message || err));
+	        this.setState(this.state);
+	    },
+	
+	    populateDatabase: function populateDatabase(db) {
+	        var that = this;
+	        that.state.progress.push("Database integrity check");
+	        that.setState(that.state);
+	        db.executeSql('SELECT 1 FROM Version LIMIT 1').then(function () {
+	            that.state.progress.push("Database is ready ... executing query ...");
+	            that.setState(that.state);
+	            db.transaction(that.queryEmployees).then(function () {
+	                that.state.progress.push("Processing completed");
+	                that.setState(that.state);
+	            });
+	        })['catch'](function (error) {
+	            console.log("Received error: ", error);
+	            that.state.progress.push("Database not yet ready ... populating data");
+	            that.setState(that.state);
+	            db.transaction(that.populateDB).then(function () {
+	                that.state.progress.push("Database populated ... executing query ...");
+	                that.setState(that.state);
+	                db.transaction(that.queryEmployees).then(function (result) {
+	                    console.log("Transaction is now finished");
+	                    that.state.progress.push("Processing completed");
+	                    that.setState(that.state);
+	                    that.closeDatabase();
+	                });
+	            });
+	        });
+	    },
+	
+	    populateDB: function populateDB(tx) {
+	        var that = this;
+	
+	        this.state.progress.push("Executing DROP stmts");
+	        this.setState(this.state);
+	
+	        tx.executeSql('DROP TABLE IF EXISTS Employees;');
+	        tx.executeSql('DROP TABLE IF EXISTS Offices;');
+	        tx.executeSql('DROP TABLE IF EXISTS Departments;');
+	
+	        this.state.progress.push("Executing CREATE stmts");
+	        this.setState(this.state);
+	
+	        tx.executeSql('CREATE TABLE IF NOT EXISTS Version( ' + 'version_id INTEGER PRIMARY KEY NOT NULL); ')['catch'](function (error) {
+	            that.errorCB(error);
+	        });
+	
+	        tx.executeSql('CREATE TABLE IF NOT EXISTS Departments( ' + 'department_id INTEGER PRIMARY KEY NOT NULL, ' + 'name VARCHAR(30) ); ')['catch'](function (error) {
+	            that.errorCB(error);
+	        });
+	
+	        tx.executeSql('CREATE TABLE IF NOT EXISTS Offices( ' + 'office_id INTEGER PRIMARY KEY NOT NULL, ' + 'name VARCHAR(20), ' + 'longtitude FLOAT, ' + 'latitude FLOAT ) ; ')['catch'](function (error) {
+	            that.errorCB(error);
+	        });
+	
+	        tx.executeSql('CREATE TABLE IF NOT EXISTS Employees( ' + 'employe_id INTEGER PRIMARY KEY NOT NULL, ' + 'name VARCHAR(55), ' + 'office INTEGER, ' + 'department INTEGER, ' + 'FOREIGN KEY ( office ) REFERENCES Offices ( office_id ) ' + 'FOREIGN KEY ( department ) REFERENCES Departments ( department_id ));')['catch'](function (error) {
+	            that.errorCB(error);
+	        });
+	
+	        this.state.progress.push("Executing INSERT stmts");
+	        this.setState(this.state);
+	
+	        tx.executeSql('INSERT INTO Departments (name) VALUES ("Client Services");');
+	        tx.executeSql('INSERT INTO Departments (name) VALUES ("Investor Services");');
+	        tx.executeSql('INSERT INTO Departments (name) VALUES ("Shipping");');
+	        tx.executeSql('INSERT INTO Departments (name) VALUES ("Direct Sales");');
+	
+	        tx.executeSql('INSERT INTO Offices (name, longtitude, latitude) VALUES ("Denver", 59.8,  34.1);');
+	        tx.executeSql('INSERT INTO Offices (name, longtitude, latitude) VALUES ("Warsaw", 15.7, 54.1);');
+	        tx.executeSql('INSERT INTO Offices (name, longtitude, latitude) VALUES ("Berlin", 35.3, 12.1);');
+	        tx.executeSql('INSERT INTO Offices (name, longtitude, latitude) VALUES ("Paris", 10.7, 14.1);');
+	
+	        tx.executeSql('INSERT INTO Employees (name, office, department) VALUES ("Sylvester Stallone", 2,  4);');
+	        tx.executeSql('INSERT INTO Employees (name, office, department) VALUES ("Elvis Presley", 2, 4);');
+	        tx.executeSql('INSERT INTO Employees (name, office, department) VALUES ("Leslie Nelson", 3,  4);');
+	        tx.executeSql('INSERT INTO Employees (name, office, department) VALUES ("Fidel Castro", 3, 3);');
+	        tx.executeSql('INSERT INTO Employees (name, office, department) VALUES ("Bill Clinton", 1, 3);');
+	        tx.executeSql('INSERT INTO Employees (name, office, department) VALUES ("Margaret Thatcher", 1, 3);');
+	        tx.executeSql('INSERT INTO Employees (name, office, department) VALUES ("Donald Trump", 1, 3);');
+	        tx.executeSql('INSERT INTO Employees (name, office, department) VALUES ("Dr DRE", 2, 2);');
+	        tx.executeSql('INSERT INTO Employees (name, office, department) VALUES ("Samantha Fox", 2, 1);');
+	        console.log("all config SQL done");
+	    },
+	
+	    queryEmployees: function queryEmployees(tx) {
+	        var that = this;
+	        console.log("Executing employee query");
+	        tx.executeSql('SELECT a.name, b.name as deptName FROM Employees a, Departments b WHERE a.department = b.department_id').then(function (_ref) {
+	            var _ref2 = _slicedToArray(_ref, 2);
+	
+	            var tx = _ref2[0];
+	            var results = _ref2[1];
+	
+	            that.state.progress.push("Query completed");
+	            that.setState(that.state);
+	            var len = results.rows.length;
+	            for (var i = 0; i < len; i++) {
+	                var row = results.rows.item(i);
+	                that.state.progress.push('Empl Name: ' + row.name + ', Dept Name: ' + row.deptName);
+	            }
+	            that.setState(that.state);
+	        })['catch'](function (error) {
+	            console.log(error);
+	        });
+	    },
+	
+	    loadAndQueryDB: function loadAndQueryDB() {
+	        var that = this;
+	        that.state.progress.push("Opening database ...");
+	        that.state.progress.push(goodPassword ? "Good Password" : "Bad Password");
+	        that.setState(that.state);
+	        SQLite.openDatabase({ 'name': database_name, 'key': goodPassword ? database_key : bad_database_key }).then(function (DB) {
+	            db = DB;
+	            that.state.progress.push("Database OPEN");
+	            that.setState(that.state);
+	            that.populateDatabase(DB);
+	        })['catch'](function (error) {
+	            console.log(error);
+	        });
+	    },
+	
+	    closeDatabase: function closeDatabase() {
+	        var that = this;
+	        if (db) {
+	            console.log("Closing database ...");
+	            goodPassword = !goodPassword;
+	            that.state.progress.push("Closing DB");
+	            that.setState(that.state);
+	            db.close().then(function (status) {
+	                that.state.progress.push("Database CLOSED");
+	                that.setState(that.state);
+	            })['catch'](function (error) {
+	                that.errorCB(error);
+	            });
+	        } else {
+	            that.state.progress.push("Database was not OPENED");
+	            that.setState(that.state);
+	        }
+	    },
+	
+	    deleteDatabase: function deleteDatabase() {
+	        var that = this;
+	        that.state.progress = ["Deleting database"];
+	        that.setState(that.state);
+	        goodPassword = true;
+	        SQLite.deleteDatabase(database_name).then(function () {
+	            console.log("Database DELETED");
+	            that.state.progress.push("Database DELETED");
+	            that.setState(that.state);
+	        })['catch'](function (error) {
+	            that.errorCB(error);
+	        });
+	    },
+	
+	    runDemo: function runDemo() {
+	        this.state.progress = ["Starting SQLite Demo"];
+	        this.setState(this.state);
+	        this.loadAndQueryDB();
+	    },
+	
+	    renderProgressEntry: function renderProgressEntry(entry) {
+	        return React.createElement(
+	            View,
+	            { style: listStyles.li },
+	            React.createElement(
+	                View,
+	                null,
+	                React.createElement(
+	                    Text,
+	                    { style: listStyles.title },
+	                    entry
+	                )
+	            )
+	        );
+	    },
+	
+	    render: function render() {
+	        var ds = new ListView.DataSource({ rowHasChanged: function rowHasChanged(row1, row2) {
+	                row1 !== row2;
+	            } });
+	        return React.createElement(
+	            View,
+	            { style: styles.mainContainer },
+	            React.createElement(
+	                View,
+	                { style: styles.toolbar },
+	                React.createElement(
+	                    TouchableOpacity,
+	                    { onPress: this.runDemo, style: styles.toolbarTouchable },
+	                    React.createElement(
+	                        Text,
+	                        { style: styles.toolbarButton },
+	                        'Run Demo'
+	                    )
+	                ),
+	                React.createElement(
+	                    TouchableOpacity,
+	                    { onPress: this.closeDatabase, style: styles.toolbarTouchable },
+	                    React.createElement(
+	                        Text,
+	                        { style: styles.toolbarButton },
+	                        'Close DB'
+	                    )
+	                ),
+	                React.createElement(
+	                    TouchableOpacity,
+	                    { onPress: this.deleteDatabase, style: styles.toolbarTouchable },
+	                    React.createElement(
+	                        Text,
+	                        { style: styles.toolbarButton },
+	                        'Delete DB'
+	                    )
+	                )
+	            ),
+	            React.createElement(ListView, {
+	                dataSource: ds.cloneWithRows(this.state.progress),
+	                renderRow: this.renderProgressEntry,
+	                style: listStyles.liContainer })
+	        );
+	    }
+	});
+	
+	var listStyles = StyleSheet.create({
+	    li: {
+	        borderBottomColor: '#c8c7cc',
+	        borderBottomWidth: 0.5,
+	        paddingTop: 15,
+	        paddingRight: 15,
+	        paddingBottom: 15
+	    },
+	    liContainer: {
+	        backgroundColor: '#fff',
+	        flex: 1,
+	        paddingLeft: 15
+	    },
+	    liIndent: {
+	        flex: 1
+	    },
+	    liText: {
+	        color: '#333',
+	        fontSize: 17,
+	        fontWeight: '400',
+	        marginBottom: -3.5,
+	        marginTop: -3.5
+	    }
+	});
+	
+	var styles = StyleSheet.create({
+	    container: {
+	        flex: 1,
+	        justifyContent: 'center',
+	        alignItems: 'center',
+	        backgroundColor: '#F5FCFF'
+	    },
+	    welcome: {
+	        fontSize: 20,
+	        textAlign: 'center',
+	        margin: 10
+	    },
+	    instructions: {
+	        textAlign: 'center',
+	        color: '#333333',
+	        marginBottom: 5
+	    },
+	    toolbar: {
+	        backgroundColor: '#51c04d',
+	        paddingTop: 30,
+	        paddingBottom: 10,
+	        flexDirection: 'row'
+	    },
+	    toolbarButton: {
+	        color: 'blue',
+	        textAlign: 'center',
+	        flex: 1
+	    },
+	    toolbarTouchable: {
+	        flex: 1
+	    },
+	    mainContainer: {
+	        flex: 1
+	    }
+	});
+	module.exports = exports['default'];
+
+/***/ },
+/* 336 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/*
 	 * sqlite.js
 	 *
 	 * Created by Andrzej Porebski on 10/29/15.
@@ -49722,14 +49761,14 @@
 	 * This library is available under the terms of the MIT License (2008).
 	 * See http://opensource.org/licenses/alphabetical for full text.
 	 */
-	//var plugin = {SQLiteFactory} = require('./lib/sqlite.core.js');
+	
 	"use strict";
 	
 	var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; })();
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 	
-	var _libSqliteCoreJs = __webpack_require__(336);
+	var _libSqliteCoreJs = __webpack_require__(337);
 	
 	var _libSqliteCoreJs2 = _interopRequireDefault(_libSqliteCoreJs);
 	
@@ -49821,7 +49860,7 @@
 	module.exports = new _libSqliteCoreJs.SQLiteFactory();
 
 /***/ },
-/* 336 */
+/* 337 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -49841,12 +49880,19 @@
 	
 	'use strict';
 	
-	var NativeModules = __webpack_require__(2).NativeModules;
-	var Platform = __webpack_require__(2).Platform;
-	if (Platform.OS == 'winjs') {
-	  NativeModules["SQLite"] = __webpack_require__(337);
-	}
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 	
+	var _reactNative = __webpack_require__(2);
+	
+	var _reactNative2 = _interopRequireDefault(_reactNative);
+	
+	var _SQLiteProxy = __webpack_require__(338);
+	
+	var _SQLiteProxy2 = _interopRequireDefault(_SQLiteProxy);
+	
+	if (_reactNative.Platform.OS == 'winjs') {
+	  _reactNative.NativeModules["SQLite"] = _SQLiteProxy2['default'];
+	}
 	var DB_STATE_INIT, DB_STATE_OPEN, READ_ONLY_REGEX, SQLiteFactory, SQLitePlugin, SQLitePluginTransaction, argsArray, dblocations, newSQLError, nextTick, root, txLocks;
 	
 	var plugin = {};
@@ -49913,7 +49959,7 @@
 	  if (plugin.sqlitePlugin.DEBUG) {
 	    console.log('SQLite.' + method + '(' + JSON.stringify(options) + ')');
 	  }
-	  NativeModules["SQLite"][method](options, success, error);
+	  _reactNative.NativeModules["SQLite"][method](options, success, error);
 	};
 	
 	SQLitePlugin = function (openargs, openSuccess, openError) {
@@ -50074,12 +50120,12 @@
 	    } else {
 	      console.log('closing db with no transaction lock state');
 	    }
-	    mysuccess = function (t, r) {
+	    var mysuccess = function mysuccess(t, r) {
 	      if (!!success) {
 	        return success(r);
 	      }
 	    };
-	    myerror = function (t, e) {
+	    var myerror = function myerror(t, e) {
 	      if (!!error) {
 	        return error(e);
 	      } else {
@@ -50178,12 +50224,12 @@
 	    });
 	    return;
 	  }
-	  mysuccess = function (t, r) {
+	  var mysuccess = function mysuccess(t, r) {
 	    if (!!success) {
 	      return success(t, r);
 	    }
 	  };
-	  myerror = function (t, e) {
+	  var myerror = function myerror(t, e) {
 	    if (!!error) {
 	      return error(e);
 	    } else {
@@ -50313,7 +50359,7 @@
 	      }
 	    }
 	  };
-	  myerror = function (error) {
+	  var myerror = function myerror(error) {
 	    console.log("batch execution error: ", error);
 	  };
 	
@@ -50468,12 +50514,12 @@
 	    args.dblocation = dblocation || dblocations[0];
 	  }
 	
-	  mysuccess = function (r) {
+	  var mysuccess = function mysuccess(r) {
 	    if (!!success) {
 	      return success(r);
 	    }
 	  };
-	  myerror = function (e) {
+	  var myerror = function myerror(e) {
 	    if (!!error) {
 	      return error(e);
 	    } else {
@@ -50496,16 +50542,14 @@
 	module.exports = plugin.sqlitePlugin;
 
 /***/ },
-/* 337 */
-/***/ function(module, exports, __webpack_require__) {
+/* 338 */
+/***/ function(module, exports) {
 
 	"use strict";
 	
 	Object.defineProperty(exports, "__esModule", {
 		value: true
 	});
-	
-	var _reactNative = __webpack_require__(2);
 	
 	var dbmap = {};
 	

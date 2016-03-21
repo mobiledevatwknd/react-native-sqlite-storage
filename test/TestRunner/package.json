@@ -16,6 +16,7 @@
     "haste-resolver-webpack-plugin": "^0.1.2",
     "json-loader": "^0.5.2",
     "react-hot-loader": "^1.2.7",
+    "script-loader": "^0.6.1",
     "webpack": "^1.12.10",
     "webpack-dev-server": "^1.14.0",
     "webpack-html-plugin": "^0.1.1"
