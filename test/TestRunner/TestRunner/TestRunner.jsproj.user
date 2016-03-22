@@ -6,6 +6,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
     <DebuggerFlavor>AppHostRemoteDebugger</DebuggerFlavor>
     <MachineName>localhost</MachineName>
-    <DebuggerType>Script</DebuggerType>
+    <DebuggerType>NativeOnly</DebuggerType>
   </PropertyGroup>
 </Project>

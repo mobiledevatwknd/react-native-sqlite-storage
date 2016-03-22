@@ -37,7 +37,6 @@
       <InProcessServer>
         <Path>SQLCipher.dll</Path>
         <ActivatableClass ActivatableClassId="SQLite3.Database" ThreadingModel="both" />
-        <ActivatableClass ActivatableClassId="SQLite3.Statement" ThreadingModel="both" />
         <ActivatableClass ActivatableClassId="SQLite3.ResultCode" ThreadingModel="both" />
         <ActivatableClass ActivatableClassId="SQLite3.Datatype" ThreadingModel="both" />
       </InProcessServer>

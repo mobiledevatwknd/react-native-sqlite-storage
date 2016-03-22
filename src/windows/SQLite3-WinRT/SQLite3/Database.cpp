@@ -21,10 +21,10 @@ namespace SQLite3 {
   static int WinLocaleCollateUtf16(void *data, int str1Length, const void* str1Data, int str2Length, const void* str2Data) {
     Database^ db = reinterpret_cast<Database^>(data);
     Platform::String^ language = db->CollationLanguage;
-    int compareResult = CompareStringEx(language ? language->Data() : LOCALE_NAME_USER_DEFAULT, 
-                                        LINGUISTIC_IGNORECASE|LINGUISTIC_IGNOREDIACRITIC|SORT_DIGITSASNUMBERS, 
-                                        (LPCWCH)str1Data, str1Length/sizeof(wchar_t), 
-                                        (LPCWCH)str2Data, str2Length/sizeof(wchar_t), 
+    int compareResult = CompareStringEx(language ? language->Data() : LOCALE_NAME_USER_DEFAULT,
+                                        LINGUISTIC_IGNORECASE|LINGUISTIC_IGNOREDIACRITIC|SORT_DIGITSASNUMBERS,
+                                        (LPCWCH)str1Data, str1Length/sizeof(wchar_t),
+                                        (LPCWCH)str2Data, str2Length/sizeof(wchar_t),
                                         NULL, NULL, 0);
     if (compareResult == 0) {
       throw ref new Platform::InvalidArgumentException();
@@ -82,7 +82,7 @@ namespace SQLite3 {
 
       key = (wchar_t*)sqlite3_value_text16(argv[1]);
     }
-    
+
     auto platformKey = ref new Platform::String(key);
     auto translation = resourceLoader->GetString(platformKey);
     sqlite3_result_text16(context, translation->Data(), (translation->Length()+1)*sizeof(wchar_t), SQLITE_TRANSIENT);
@@ -97,7 +97,7 @@ namespace SQLite3 {
 
     // Need to remember the current thread for later callbacks into JS
     CoreDispatcher^ dispatcher = CoreWindow::GetForCurrentThread()->Dispatcher;
-    
+
     return Concurrency::create_async([dbPath, dispatcher]() {
       sqlite3* sqlite;
       int ret = sqlite3_open16(dbPath->Data(), &sqlite);
@@ -108,7 +108,7 @@ namespace SQLite3 {
       }
 
       return ref new Database(sqlite, dispatcher);
-    });    
+    });
   }
 
   IAsyncOperation<Database^>^ Database::OpenAsyncWithKey(Platform::String^ dbPath, Platform::String^ key) {
@@ -116,14 +116,18 @@ namespace SQLite3 {
 		  throw ref new Platform::COMException(E_INVALIDARG, L"You must specify a path or :memory:");
 	  }
 
+	  OutputDebugString(L"In open async with key\n");
+
 	  // Need to remember the current thread for later callbacks into JS
 	  CoreDispatcher^ dispatcher = CoreWindow::GetForCurrentThread()->Dispatcher;
 
 	  return Concurrency::create_async([dbPath, key, dispatcher]() {
+		  OutputDebugString(L"In Async Task to create database\n");
 		  sqlite3* sqlite;
 		  int ret = sqlite3_open16(dbPath->Data(), &sqlite);
 
 		  if (ret != SQLITE_OK) {
+			  OutputDebugString(L"Failed to open database\n");
 			  sqlite3_close(sqlite);
 			  throwSQLiteError(ret, dbPath);
 		  }
@@ -131,10 +135,18 @@ namespace SQLite3 {
 		  std::string skey(wkey.begin(), wkey.end());
 		  if ((ret = sqlite3_key(sqlite, skey.c_str(), skey.length())) != SQLITE_OK)
 		  {
+			  OutputDebugString(L"Failed to set key\n");
 			  sqlite3_close(sqlite);
 			  throwSQLiteError(ret, dbPath);
+      }
+      if (sqlite3_exec(sqlite, "SELECT count(*) FROM sqlite_master;", NULL, NULL, NULL) != SQLITE_OK) {
+        //bad key
+        OutputDebugString(L"Failed to set key\n");
+        sqlite3_close(sqlite);
+  			throwSQLiteError(ret, dbPath);
 		  }
 
+		  OutputDebugString(L"Returning database\n");
 		  return ref new Database(sqlite, dispatcher);
 
 	  });
@@ -160,7 +172,11 @@ namespace SQLite3 {
   }
 
   Database::~Database() {
-    sqlite3_close(sqlite);
+	  close();
+  }
+
+  int Database::close() {
+	  return sqlite3_close_v2(sqlite);
   }
 
   void Database::addChangeHandler(int& handlerCount) {
@@ -202,13 +218,13 @@ namespace SQLite3 {
   void Database::OnChange(int action, char const* dbName, char const* tableName, sqlite3_int64 rowId) {
     if (fireEvents) {
       DispatchedHandler^ handler;
-      
+
       switch (action) {
       case SQLITE_INSERT:
         if (insertChangeHandlers) {
           ChangeEvent event;
           event.RowId = rowId;
-          event.TableName = ToPlatformString(tableName);        
+          event.TableName = ToPlatformString(tableName);
           handler = ref new DispatchedHandler([this, event]() {
             _Insert(this, event);
           });
@@ -218,7 +234,7 @@ namespace SQLite3 {
         if (updateChangeHandlers) {
           ChangeEvent event;
           event.RowId = rowId;
-          event.TableName = ToPlatformString(tableName);        
+          event.TableName = ToPlatformString(tableName);
           handler = ref new DispatchedHandler([this, event]() {
             _Update(this, event);
           });
@@ -228,7 +244,7 @@ namespace SQLite3 {
         if (deleteChangeHandlers) {
           ChangeEvent event;
           event.RowId = rowId;
-          event.TableName = ToPlatformString(tableName);        
+          event.TableName = ToPlatformString(tableName);
           handler = ref new DispatchedHandler([this, event]() {
             _Delete(this, event);
           });
@@ -338,6 +354,6 @@ namespace SQLite3 {
       lastErrorMessage = (WCHAR*)sqlite3_errmsg16(sqlite);
     } else {
       lastErrorMessage.clear();
-    }        
+    }
   }
 }

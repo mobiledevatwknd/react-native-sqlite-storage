@@ -54,7 +54,7 @@
 /******/ 	
 /******/ 	
 /******/ 	var hotApplyOnUpdate = true;
-/******/ 	var hotCurrentHash = "576df0fa9b22a6f8b967"; // eslint-disable-line no-unused-vars
+/******/ 	var hotCurrentHash = "e7cb6f28c163e5344172"; // eslint-disable-line no-unused-vars
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentParents = []; // eslint-disable-line no-unused-vars
 /******/ 	
@@ -20948,19 +20948,9 @@
 	  value: true
 	});
 	
-	var _extends = Object.assign || function (target) {
-	  for (var i = 1; i < arguments.length; i++) {
-	    var source = arguments[i];for (var key in source) {
-	      if (Object.prototype.hasOwnProperty.call(source, key)) {
-	        target[key] = source[key];
-	      }
-	    }
-	  }return target;
-	};
+	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 	
-	function _interopRequireDefault(obj) {
-	  return obj && obj.__esModule ? obj : { 'default': obj };
-	}
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 	
 	var _react = __webpack_require__(3);
 	
@@ -21092,7 +21082,21 @@
 	    });
 	    var animatedOverlayStyles = { opacity: overlayOpacity };
 	
-	    return _react2['default'].createElement(_ReactView2['default'], _extends({ style: { flex: 1, backgroundColor: 'transparent' } }, this._panResponder.panHandlers), _react2['default'].createElement(_ReactAnimated2['default'].View, { style: styles.main }, this.props.children), _react2['default'].createElement(_ReactAnimated2['default'].View, { style: [styles.overlay, animatedOverlayStyles], onClick: this.close }), _react2['default'].createElement(_ReactAnimated2['default'].View, { style: [styles.drawer, dynamicDrawerStyles, animatedDrawerStyles] }, this.props.renderNavigationView()));
+	    return _react2['default'].createElement(
+	      _ReactView2['default'],
+	      _extends({ style: { flex: 1, backgroundColor: 'transparent' } }, this._panResponder.panHandlers),
+	      _react2['default'].createElement(
+	        _ReactAnimated2['default'].View,
+	        { style: styles.main },
+	        this.props.children
+	      ),
+	      _react2['default'].createElement(_ReactAnimated2['default'].View, { style: [styles.overlay, animatedOverlayStyles], onClick: this.close }),
+	      _react2['default'].createElement(
+	        _ReactAnimated2['default'].View,
+	        { style: [styles.drawer, dynamicDrawerStyles, animatedDrawerStyles] },
+	        this.props.renderNavigationView()
+	      )
+	    );
 	  },
 	
 	  _emitStateChanged: function _emitStateChanged(newState) {
@@ -50557,80 +50561,36 @@
 		window.setTimeout(fun, 0);
 	};
 	
-	function handle(p, win, fail) {
-		if (p) p.done(function (res) {
-			if (res[1]) fail(res[1]);else win(res[0] ? JSON.parse(res[0]) : []);
-		}, function (err) {
-			fail(err);
-		});
-	}
-	
 	var plugin = {
 		open: function open(args, win, fail) {
 			var options = args;
 			var res;
+			var dbname = options.name;
 	
-			function openImmediate(dbname) {
-				//var dbname = options.name;
-				// from @EionRobb / phonegap-win8-sqlite:
-				var opendbname = Windows.Storage.ApplicationData.current.localFolder.path + "\\" + dbname;
-				console.log("open db name: " + dbname + " at full path: " + opendbname);
+			//var dbname = options.name;
+			// from @EionRobb / phonegap-win8-sqlite:
+			var opendbname = Windows.Storage.ApplicationData.current.localFolder.path + "\\" + dbname;
+			console.log("open db name: " + dbname + " at full path: " + opendbname);
 	
-				var db = new SQLite3JS.Database(opendbname);
-	
-				if (!!options.key && options.key.length !== 0) {
-					db.key(options.key);
-					// ignore result if following access test does not throw.
-				}
-	
-				// test if db can be accessed:
-				db.all("SELECT count(*) FROM sqlite_master", []);
-	
+			SQLite3JS.openAsync(opendbname, options).then(function (db) {
 				dbmap[dbname] = db;
-	
-				nextTick(function () {
-					win();
-				});
-				//res = SQLitePluginRT.SQLitePlugin.openAsync(options.name);
-			}
-	
-			try {
-				//res = SQLitePluginRT.SQLitePlugin.openAsync(options.name);
-				var dbname = options.name;
-	
-				openImmediate(dbname);
-			} catch (ex) {
-				//fail(ex);
-				nextTick(function () {
-					fail(ex);
-				});
-			}
-			//handle(res, win, fail);
+				win();
+			}, function (error) {
+				fail(error);
+			});
 		},
 		close: function close(args, win, fail) {
 			var options = args;
-			var res;
-	
-			// pretend [XXX TODO]:
+			var dbname = options.path;
 			nextTick(function () {
-				win();
+				if (!!dbmap[dbname]) {
+					dbmap[dbname].close();
+					delete dbmap[dbname];
+					win();
+				} else {
+					fail("Failed to close database"); // XXX TODO REPORT ERROR
+				}
 			});
-			return;
-			try {
-				//res = SQLitePluginRT.SQLitePlugin.closeAsync(JSON.stringify(options));
-				var dbname = options.path;
-				nextTick(function () {
-					if (!!dbmap[dbname] && dbmap[dbname].close() == 0) {
-						delete dbmap[dbname];
-						win();
-					} else {
-						fail(); // XXX TODO REPORT ERROR
-					}
-				});
-			} catch (ex) {
-				fail(ex);
-			}
-			//handle(res, win, fail);
 		},
 		backgroundExecuteSqlBatch: function backgroundExecuteSqlBatch(args, win, fail) {
 			var options = args;
@@ -50643,37 +50603,40 @@
 			    count = executes.length;
 			//console.log("executes: " + JSON.stringify(executes));
 			//console.log("execute sql count: " + count);
-			for (i = 0; i < count; ++i) {
-				var e = executes[i];
-				//console.log("execute sql: " + e.sql + " params: " + JSON.stringify(e.params));
-				try {
-					var oldTotalChanges = db.totalChanges();
-					var rows = db.all(e.sql, e.params);
-					//console.log("got rows: " + JSON.stringify(rows));
+	
+			var oldTotalChanges = db.totalChanges();
+	
+			var promise = WinJS.Promise.as(null);
+			executes.forEach(function (e) {
+				promise = promise.then(function () {
+					return db.allAsync(e.sql, e.params);
+				}).then(function (rows) {
 					var rowsAffected = db.totalChanges() - oldTotalChanges;
 					var result = { rows: rows, rowsAffected: rowsAffected };
 					if (rowsAffected > 0) {
-						var lastInsertRowid = db.lastInsertRowid();
-						if (lastInsertRowid !== 0) result.insertId = lastInsertRowid;
+						var lastInsertRowId = db.lastInsertRowId;
+						if (lastInsertRowId !== 0) result.insertId = lastInsertRowId;
 					}
 					results.push({
 						type: "success",
 						qid: e.qid,
 						result: result
 					});
-				} catch (ex) {
-					console.log("sql exception error: " + ex.message);
+					return null;
+				}, function (err) {
+					console.log("sql exception error: " + err);
 					results.push({
 						type: "error",
 						qid: e.qid,
-						result: { code: -1, message: ex.message }
+						result: { code: -1, message: err }
 					});
-				}
-			}
-			//console.log("return results: " + JSON.stringify(results));
-			nextTick(function () {
-				//console.log("return results: " + JSON.stringify(results));
+					return null;
+				});
+			});
+			promise.then(function () {
 				win(results);
+			}, function (err) {
+				fail(err);
 			});
 		},
 		"delete": function _delete(args, win, fail) {
@@ -50691,8 +50654,7 @@
 					}
 	
 					if (!!dbmap[dbname]) {
-						dbmap[dbname].close_v2();
-	
+						dbmap[dbname].close();
 						delete dbmap[dbname];
 					}
 	

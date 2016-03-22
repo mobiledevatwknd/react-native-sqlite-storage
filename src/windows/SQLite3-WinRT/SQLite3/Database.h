@@ -8,13 +8,13 @@ namespace SQLite3 {
     Platform::String^ TableName;
     int64 RowId;
   };
-  
+
   public delegate void ChangeHandler(Platform::Object^ source, ChangeEvent event);
-  
+
   public ref class Database sealed {
   public:
     static IAsyncOperation<Database^>^ OpenAsync(Platform::String^ dbPath);
-	static IAsyncOperation<Database^>^ OpenAsyncWithKey(Platform::String^ dbPath, Platform::String ^key);
+	  static IAsyncOperation<Database^>^ OpenAsyncWithKey(Platform::String^ dbPath, Platform::String ^key);
 
     static property bool SharedCache {
       bool get() {
@@ -28,7 +28,7 @@ namespace SQLite3 {
         }
       };
     }
-    
+
     virtual ~Database();
 
     Windows::Foundation::IAsyncOperation<int>^ RunAsyncVector(Platform::String^ sql, ParameterVector^ params);
@@ -42,7 +42,8 @@ namespace SQLite3 {
 
     Windows::Foundation::IAsyncAction^ VacuumAsync();
 
-    
+	  int close();
+
     property Platform::String^ LastError {
       Platform::String^ get() {
         return ref new Platform::String(lastErrorMessage.c_str());
