@@ -1,35 +1,39 @@
 #pragma once
 
 #include "sqlite3.h"
+#include "Common.h"
 
-namespace SQLite3
-{
-  ref class Database;
-
-  public ref class Statement sealed
-  {
+namespace SQLite3 {
+  class Statement {
   public:
-    Statement(Database^ database, Platform::String^ sql);
-    virtual ~Statement();
+    static StatementPtr Prepare(sqlite3* sqlite, Platform::String^ sql);
+    ~Statement();
 
-    int Step();
+    void Bind(const SafeParameterVector& params);
+    void Bind(ParameterMap^ params);
 
-    int ColumnCount();
-    int ColumnType(int index);
-    Platform::String^ ColumnName(int index);
+    void Run();
+    Platform::String^ One();
+    Platform::String^ All();
+    void Each(EachCallback^ callback, Windows::UI::Core::CoreDispatcher^ dispatcher);
 
-    Platform::String^ ColumnText(int index);
-    int ColumnInt(int index);
-    long long ColumnInt64(int index);
-    double ColumnDouble(int index);
-
-    int BindText(int index, Platform::String^ val);
-    int BindInt(int index, int val);
-    int BindInt64(int index, long long val);
-    int BindDouble(int index, double val);
-    int BindNull(int index);
+    bool ReadOnly() const;
 
   private:
+    Statement(sqlite3_stmt* statement);
+
+    void BindParameter(int index, Platform::Object^ value);
+    int BindParameterCount();
+    std::wstring BindParameterName(int index);
+    
+    int Step();
+    void GetRow(std::wostringstream& row);
+    
+    int ColumnCount();
+    int ColumnType(int index);
+    
+  private:
+    HANDLE dbLockMutex;
     sqlite3_stmt* statement;
   };
 }

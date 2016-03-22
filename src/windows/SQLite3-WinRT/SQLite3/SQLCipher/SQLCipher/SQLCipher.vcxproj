@@ -214,6 +214,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\..\common\sqlite3.h" />
+    <ClInclude Include="..\..\Common.h" />
     <ClInclude Include="..\..\Constants.h" />
     <ClInclude Include="..\..\Database.h" />
     <ClInclude Include="..\..\Statement.h" />
@@ -223,6 +224,7 @@
     <ClCompile Include="..\..\..\..\..\common\sqlite3.c">
       <CompileAsWinRT Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsWinRT>
     </ClCompile>
+    <ClCompile Include="..\..\Common.cpp" />
     <ClCompile Include="..\..\Constants.cpp" />
     <ClCompile Include="..\..\Database.cpp" />
     <ClCompile Include="..\..\Statement.cpp" />

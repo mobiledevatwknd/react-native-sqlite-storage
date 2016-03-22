@@ -12,6 +12,7 @@
     <ClCompile Include="..\..\Database.cpp" />
     <ClCompile Include="..\..\Statement.cpp" />
     <ClCompile Include="..\..\..\..\..\common\sqlite3.c" />
+    <ClCompile Include="..\..\Common.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -19,5 +20,6 @@
     <ClInclude Include="..\..\Database.h" />
     <ClInclude Include="..\..\Statement.h" />
     <ClInclude Include="..\..\..\..\..\common\sqlite3.h" />
+    <ClInclude Include="..\..\Common.h" />
   </ItemGroup>
 </Project>
