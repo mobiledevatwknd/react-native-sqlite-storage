@@ -182,7 +182,7 @@ npm install --save react-native-sqlcipher-storage
 
 #### Step 2 - Build OpenSSL
 Follow the instructions in src\windows\SQLite3-WinRT\SQLite3\openssl-WinRt\INSTALL.WINUNIVERSAL
-comes from here, (https://github.com/Microsoft/openssl/)
+Download and build OpenSSL (static library variant) from here: https://github.com/Microsoft/openssl/ following the instructions in INSTALL.WINUNIVERSAL. You'll also need to create an environment variable OPENSSL to point at the install location
 
 #### Add SqlCipher to your windows project
 1. File -> Add -> Existing Project
