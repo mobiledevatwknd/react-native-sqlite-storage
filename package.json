@@ -25,9 +25,9 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/andpor/react-native-sqlite-storage/issues"
+    "url": "https://github.com/andpor/react-native-sqlcipher-storage/issues"
   },
-  "homepage": "https://github.com/andpor/react-native-sqlite-storage",
+  "homepage": "https://github.com/axsy-dev/react-native-sqlcipher-storage",
   "peerDependencies": {
     "react-native": ">=0.14.0"
   }

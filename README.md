@@ -21,19 +21,19 @@ npm install --save react-native-sqlcipher-storage
 
 Drag the SQLite Xcode project as a dependency project into your React Native XCode project
 
-![alt tag](https://raw.github.com/andpor/react-native-sqlite-storage/master/instructions/libs.png)
+![alt tag](https://raw.github.com/axsy-dev/react-native-sqlcipher-storage/master/instructions/libs.png)
 
 #### Step 3. XCode SQLite libraries dependency set up
 
 Add libSQLite.a (from Workspace location) to the required Libraries and Frameworks. Also add Security.framework (XCode 7) in the same fashion using Required Libraries view (Do not just add them manually as the build paths will not be properly set)
 
-![alt tag](https://raw.github.com/andpor/react-native-sqlite-storage/master/instructions/addlibs.png)
+![alt tag](https://raw.github.com/axsy-dev/react-native-sqlcipher-storage/master/instructions/addlibs.png)
 
 #### Step 4. Application JavaScript require
 
 Add var SQLite = require('react-native-sqlcipher-storage') to your index.ios.js
 
-![alt tag](https://raw.github.com/andpor/react-native-sqlite-storage/master/instructions/require.png)
+![alt tag](https://raw.github.com/axsy-dev/react-native-sqlcipher-storage/master/instructions/require.png)
 
 #### Step 5. Application JavaScript code using the SQLite plugin
 
@@ -89,8 +89,8 @@ npm install --save react-native-sqlcipher-storage
 // file: android/settings.gradle
 ...
 
-include ':react-native-sqlite-storage'
-project(':react-native-sqlite-storage').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-sqlcipher-storage/src/android')
+include ':react-native-sqlcipher-storage'
+project(':react-native-sqlcipher-storage').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-sqlcipher-storage/src/android')
 ```
 
 #### Step 3 - Update app Gradle Build
