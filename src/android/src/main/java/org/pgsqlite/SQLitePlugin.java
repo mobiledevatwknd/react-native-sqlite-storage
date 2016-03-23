@@ -666,6 +666,9 @@ public class SQLitePlugin extends ReactContextBaseJavaModule implements Applicat
                         errorMessage = ex.getMessage();
                         Log.v("executeSqlBatch", "SQLiteDatabase.executeInsert(): Error=" + errorMessage);
                     }
+                    finally {
+                        myStatement.close();
+                    }
                 }
 
                 if (queryType == QueryType.begin) {
