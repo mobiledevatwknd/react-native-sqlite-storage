@@ -52,22 +52,20 @@ function createPromiseRuntime() {
       if (argsNeedPadding && args.length == 1){
         args.push([]);
       }
+      let retValue;
       var promise = new Promise(function(resolve,reject){
         let success = function(...args){
-          if (!returnValueExpected) {
-           return resolve(args);
-          }
+           return returnValueExpected ? resolve(retValue) : resolve(args);
         };
         let error = function(err){
           console.log('error: ',fn,...args,arguments);
           reject(err);
           return false;
         };
-        var retValue = originalFn.call(this,...args,reverseCallbacks ? error : success, reverseCallbacks ? success : error);
-        if (returnValueExpected){
-          return resolve(retValue);
-        }
+        retValue = originalFn.call(this,...args,reverseCallbacks ? error : success, reverseCallbacks ? success : error);
+
       }.bind(this));
+
 
       return promise;
     }
