@@ -14,7 +14,7 @@ namespace SQLite3 {
   public ref class Database sealed {
   public:
     static IAsyncOperation<Database^>^ OpenAsync(Platform::String^ dbPath);
-	  static IAsyncOperation<Database^>^ OpenAsyncWithKey(Platform::String^ dbPath, Platform::String ^key);
+	static IAsyncOperation<Database^>^ OpenAsyncWithKey(Platform::String^ dbPath, Platform::String ^key);
 
     static property bool SharedCache {
       bool get() {
@@ -42,7 +42,7 @@ namespace SQLite3 {
 
     Windows::Foundation::IAsyncAction^ VacuumAsync();
 
-	  int close();
+	int closedb();
 
     property Platform::String^ LastError {
       Platform::String^ get() {

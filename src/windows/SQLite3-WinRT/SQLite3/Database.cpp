@@ -172,10 +172,10 @@ namespace SQLite3 {
   }
 
   Database::~Database() {
-	  close();
+	  closedb();
   }
 
-  int Database::close() {
+  int Database::closedb() {
 	  return sqlite3_close_v2(sqlite);
   }
 
