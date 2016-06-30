@@ -11,19 +11,19 @@
  */
 'use strict';
 
-var React = require('react-native');
-var SQLite = require('react-native-sqlcipher-storage');
+import SQLite from 'react-native-sqlcipher-storage';
 SQLite.DEBUG(true);
 SQLite.enablePromise(true);
 
-var {
+import React from 'react';
+import  {
   AppRegistry,
   StyleSheet,
   Text,
   View,
   ListView,
   TouchableOpacity
-} = React;
+} from 'react-native';
 
 var database_name = "Test.db";
 var database_key = "password";
@@ -313,4 +313,3 @@ var styles = StyleSheet.create({
       flex: 1
   }
 });
-
