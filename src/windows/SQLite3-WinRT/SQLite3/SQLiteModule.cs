@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using ReactNative.Bridge;
@@ -40,7 +40,8 @@ namespace ReactNative.Modules.SQLite
                 string dbname = config.Value<string>("name") ?? "";
                 string opendbname = ApplicationData.Current.LocalFolder.Path + "\\" + dbname;
                 string key = config.Value<string>("key");
-                Database db = await (key != null ? Database.OpenAsyncWithKey(opendbname, key) : Database.OpenAsync(opendbname));
+                //Database db = await (key != null ? Database.OpenAsyncWithKey(opendbname, key) : Database.OpenAsync(opendbname));
+                Database db = await Database.OpenAsyncWithKey(opendbname, key);
                 if (version == null)
                 {
                     JObject result = JObject.Parse( await db.OneAsyncVector("SELECT sqlite_version() || ' (' || sqlite_source_id() || ')' as version", new List<string>()));
@@ -85,7 +86,7 @@ namespace ReactNative.Modules.SQLite
         {
             try
             {
-                string dbname = config.Value<JObject>("dbargs").Value<string>("name") ?? "";
+                string dbname = config.Value<JObject>("dbargs").Value<string>("dbname") ?? "";
                 JArray executes = config.Value<JArray>("executes");
                 Database db = databases[dbname];
                 JArray results = new JArray();
@@ -97,8 +98,8 @@ namespace ReactNative.Modules.SQLite
                     {
                         q = e.Value<string>("qid");
                         string s = e.Value<string>("sql");
-                        IReadOnlyList<Object> p = e.ToObject<IReadOnlyList<Object>>();
-
+                        JArray pj = e.Value<JArray>("params");
+                        IReadOnlyList<Object> p = pj.ToObject<IReadOnlyList<Object>>();
                         JArray rows = JArray.Parse(await db.AllAsyncVector(s, p));
                         long rowsAffected = db.TotalChanges - totalChanges;
                         totalChanges = db.TotalChanges;
@@ -120,7 +121,7 @@ namespace ReactNative.Modules.SQLite
                         resultInfo["type"] = "error";
                         resultInfo["qid"] = q;
                         resultInfo["result"] = result;
-                        results.Add(result);
+                        results.Add(resultInfo);
                     }
 
 

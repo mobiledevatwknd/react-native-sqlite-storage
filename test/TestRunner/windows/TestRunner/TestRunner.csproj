@@ -173,6 +173,9 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\..\..\src\windows\SQLite3-WinRT\SQLite3\SQLiteModule.cs">
+      <Link>SQLiteModule.cs</Link>
+    </Compile>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
@@ -206,10 +209,6 @@
     <ProjectReference Include="..\..\..\..\src\windows\SQLite3-WinRT\SQLite3\SQLCipher\SQLCipher\SQLCipher.vcxproj">
       <Project>{f9bb878e-b7e8-4921-a003-360f447037be}</Project>
       <Name>SQLCipher</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\..\src\windows\SQLite3-WinRT\SQLite3\SQLiteBridge\SQLiteBridge.csproj">
-      <Project>{4a65931f-c31a-4af7-b8b4-b5d434dfc862}</Project>
-      <Name>SQLiteBridge</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\node_modules\react-native-windows\ReactWindows\ReactNative\ReactNative.csproj">
       <Project>{c7673ad5-e3aa-468c-a5fd-fa38154e205c}</Project>
