@@ -142,7 +142,7 @@ namespace ReactNative.Modules.SQLite
         {
             try
             {
-                string dbname = config.Value<string>("name") ?? "";
+                string dbname = config.Value<string>("path") ?? "";
                 if (databases.Keys.Contains(dbname))
                 {
                     Database db = databases[dbname];
