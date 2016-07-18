@@ -8,19 +8,19 @@
 package org.pgsqlite;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.app.Application;
 import android.database.Cursor;
 import android.database.CursorWindow;
-import net.sqlcipher.database.SQLiteCursor;
-import net.sqlcipher.database.SQLiteDatabase;
-import net.sqlcipher.database.SQLiteException;
-import net.sqlcipher.database.SQLiteStatement;
+import android.database.sqlite.SQLiteCursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
+import android.database.sqlite.SQLiteStatement;
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.lang.IllegalArgumentException;
 import java.lang.Number;
 import java.util.concurrent.ConcurrentHashMap;
@@ -47,7 +47,7 @@ import java.io.OutputStream;
 import java.io.IOException;
 
 
-public class SQLitePlugin extends ReactContextBaseJavaModule implements Application.ActivityLifecycleCallbacks {
+public class SQLitePlugin extends ReactContextBaseJavaModule {
 
     private static final String PLUGIN_NAME = "SQLite";
 
@@ -75,62 +75,16 @@ public class SQLitePlugin extends ReactContextBaseJavaModule implements Applicat
     /**
      * Linked activity
      */
-    protected Activity activity = null;
+    protected Context context = null;
 
     /**
      * Thread pool for database operations
      */
     protected ExecutorService threadPool;
 
-    @Override
-    public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
-
-    }
-
-    @Override
-    public void onActivityStarted(Activity activity) {
-
-    }
-
-    @Override
-    public void onActivityResumed(Activity activity) {
-
-    }
-
-    @Override
-    public void onActivityPaused(Activity activity) {
-
-    }
-
-    @Override
-    public void onActivityStopped(Activity activity) {
-
-    }
-
-    @Override
-    public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
-
-    }
-
-    /**
-     * If activity matche linked Activity of this plugin, all open databases are closed.
-     *
-     * @param activity
-     */
-    @Override
-    public void onActivityDestroyed(Activity activity) {
-        Activity myActivity = this.getActivity();
-        if (activity == myActivity){
-            myActivity.getApplication().unregisterActivityLifecycleCallbacks(this);
-            Log.d(LOG_TAG, "linked activity destroyed - closing all open databases");
-            this.closeAllOpenDatabases();
-        }
-    }
-
-    public SQLitePlugin(ReactApplicationContext reactContext, Activity activity) {
+    public SQLitePlugin(ReactApplicationContext reactContext) {
         super(reactContext);
-        this.activity = activity;
-        this.activity.getApplication().registerActivityLifecycleCallbacks(this);
+        this.context = reactContext.getApplicationContext();
         this.threadPool = Executors.newCachedThreadPool();
     }
 
@@ -202,6 +156,19 @@ public class SQLitePlugin extends ReactContextBaseJavaModule implements Applicat
         }
     }
 
+    @ReactMethod
+    public void echoStringValue(ReadableMap args, Callback success, Callback error) {
+        String actionAsString = "echoStringValue";
+        try {
+            JSONArray params = new JSONArray();
+            params.put(SQLitePluginConverter.reactToJSON(args));
+            this.execute(actionAsString, params, new CallbackContext(success, error));
+        } catch (Exception ex){
+            error.invoke("Unexpected error");
+        }
+    }
+
+
     /**
      *
      * @return the thread pool available for scheduling background execution
@@ -214,8 +181,8 @@ public class SQLitePlugin extends ReactContextBaseJavaModule implements Applicat
      *
      * @return linked activity
      */
-    protected Activity getActivity(){
-        return this.activity;
+    protected Context getContext(){
+        return this.context;
     }
 
     /**
@@ -251,15 +218,19 @@ public class SQLitePlugin extends ReactContextBaseJavaModule implements Applicat
 
         JSONObject o;
         String dbname;
-        String dbpwd;
 
         switch (action) {
+            case echoStringValue:
+                o = args.getJSONObject(0);
+                String echo_value = o.getString("value");
+                cbc.success(echo_value);
+                break;
+
             case open:
                 o = args.getJSONObject(0);
                 dbname = o.getString("name");
-                dbpwd = o.getString("key");
                 // open database and start reading its queue
-                this.startDatabase(dbname, dbpwd, o, cbc);
+                this.startDatabase(dbname, o, cbc);
                 break;
 
             case close:
@@ -352,11 +323,11 @@ public class SQLitePlugin extends ReactContextBaseJavaModule implements Applicat
 
     /**
      *
-     * @param dbname
-     * @param options
-     * @param cbc
+     * @param dbname - The name of the database file
+     * @param options - options passed in from JS
+     * @param cbc - JS callback context
      */
-    private void startDatabase(String dbname, String dbpwd, JSONObject options, CallbackContext cbc) {
+    private void startDatabase(String dbname, JSONObject options, CallbackContext cbc) {
         // TODO: is it an issue that we can orphan an existing thread?  What should we do here?
         // If we re-use the existing DBRunner it might be in the process of closing...
         DBRunner r = dbrmap.get(dbname);
@@ -368,7 +339,7 @@ public class SQLitePlugin extends ReactContextBaseJavaModule implements Applicat
             // than orphaning the old DBRunner.
             cbc.success("database started");
         } else {
-            r = new DBRunner(dbname, dbpwd, options, cbc);
+            r = new DBRunner(dbname, options, cbc);
             dbrmap.put(dbname, r);
             this.getThreadPool().execute(r);
         }
@@ -376,78 +347,73 @@ public class SQLitePlugin extends ReactContextBaseJavaModule implements Applicat
     /**
      * Open a database.
      *
-     * @param dbname
-     * @param createFromAssets
-     * @param cbc
-     * @return
+     * @param dbname - The name of the database file
+     * @param assetFilePath - path to the pre-populated database file
+     * @param openFlags - the db open options
+     * @param cbc - JS callback
+     * @return instance of SQLite database
      * @throws Exception
      */
-    private SQLiteDatabase openDatabase(String dbname, String key, boolean createFromAssets, CallbackContext cbc) throws Exception {
+    private SQLiteDatabase openDatabase(String dbname, String assetFilePath, int openFlags, CallbackContext cbc) throws Exception {
+        InputStream in = null;
+        File dbfile = null;
         try {
-            SQLiteDatabase.loadLibs(activity);
-            if (this.getDatabase(dbname) != null) {
-                // this should not happen - should be blocked at the execute("open") level
+            SQLiteDatabase database = this.getDatabase(dbname);
+            if (database != null && database.isOpen()) {
+                //this only happens when DBRunner is cycling the db for the locking work around.
+                // otherwise, this should not happen - should be blocked at the execute("open") level
                 if (cbc != null) cbc.error("database already open");
                 throw new Exception("database already open");
             }
 
-            File dbfile = this.getActivity().getDatabasePath(dbname);
-
-            if (!dbfile.exists() && createFromAssets) this.createFromAssets(dbname, dbfile);
-
-            if (!dbfile.exists()) {
-                dbfile.getParentFile().mkdirs();
+            if (assetFilePath != null && assetFilePath.length() > 0) {
+                if (assetFilePath.compareTo("1") == 0) {
+                    assetFilePath = "www/" + dbname;
+                    in = this.getContext().getAssets().open(assetFilePath);
+                    Log.v("info", "Located pre-populated DB asset in app bundle www subdirectory: " + assetFilePath);
+                } else if (assetFilePath.charAt(0) == '~') {
+                    assetFilePath = assetFilePath.startsWith("~/") ? assetFilePath.substring(2) : assetFilePath.substring(1);
+                    in = this.getContext().getAssets().open(assetFilePath);
+                    Log.v("info", "Located pre-populated DB asset in app bundle subdirectory: " + assetFilePath);
+                } else {
+                    File filesDir = this.getContext().getFilesDir();
+                    assetFilePath = assetFilePath.startsWith("/") ? assetFilePath.substring(1) : assetFilePath;
+                    File assetFile = new File(filesDir, assetFilePath);
+                    in = new FileInputStream(assetFile);
+                    Log.v("info", "Located pre-populated DB asset in Files subdirectory: " + assetFile.getCanonicalPath());
+                    if (openFlags == SQLiteDatabase.OPEN_READONLY) {
+                        dbfile = assetFile;
+                        Log.v("info", "Detected read-only mode request for external asset.");
+                    }
+                }
             }
 
-            Log.v("info", "Open sqlite db: " + dbfile.getAbsolutePath());
+            if (dbfile == null) {
+                openFlags = SQLiteDatabase.OPEN_READWRITE | SQLiteDatabase.CREATE_IF_NECESSARY;
+                dbfile = this.getContext().getDatabasePath(dbname);
 
-            SQLiteDatabase mydb = SQLiteDatabase.openOrCreateDatabase(dbfile, key, null);
+                if (!dbfile.exists() && in != null) {
+                    Log.v("info", "Copying pre-populated db asset to destination");
+                    this.createFromAssets(dbname, dbfile, in);
+                }
+
+                if (!dbfile.exists()) {
+                    dbfile.getParentFile().mkdirs();
+                }
+            }
+
+            Log.v("info", "Opening sqlite db: " + dbfile.getAbsolutePath());
+
+            SQLiteDatabase mydb = SQLiteDatabase.openDatabase(dbfile.getAbsolutePath(), null, openFlags);
 
             if (cbc != null) // needed for Android locking/closing workaround
                 cbc.success("database open");
 
             return mydb;
-        } catch (SQLiteException e) {
+        } catch (SQLiteException ex) {
             if (cbc != null) // needed for Android locking/closing workaround
-                cbc.error("can't open database " + e);
-            throw e;
-        }
-    }
-
-    /**
-     * If a prepopulated DB file exists in the assets folder it is copied to the dbPath.
-     * Only runs the first time the app runs.
-     *
-     * @param myDBName
-     * @param dbfile
-     */
-    private void createFromAssets(String myDBName, File dbfile)
-    {
-        InputStream in = null;
-        OutputStream out = null;
-
-        try {
-            in = this.getActivity().getAssets().open("www/" + myDBName);
-            String dbPath = dbfile.getAbsolutePath();
-            dbPath = dbPath.substring(0, dbPath.lastIndexOf("/") + 1);
-
-            File dbPathFile = new File(dbPath);
-            if (!dbPathFile.exists())
-                dbPathFile.mkdirs();
-
-            File newDbFile = new File(dbPath + myDBName);
-            out = new FileOutputStream(newDbFile);
-
-            // XXX TODO: this is very primitive, other alternatives at:
-            // http://www.journaldev.com/861/4-ways-to-copy-file-in-java
-            byte[] buf = new byte[1024];
-            int len;
-            while ((len = in.read(buf)) > 0)
-                out.write(buf, 0, len);
-
-            Log.v("info", "Copied prepopulated DB content to: " + newDbFile.getAbsolutePath());
-        } catch (IOException e) {
-            Log.v("createFromAssets", "No prepopulated DB found, Error=" + e.getMessage());
+                cbc.error("can't open database " + ex);
+            throw ex;
         } finally {
             if (in != null) {
                 try {
@@ -455,7 +421,43 @@ public class SQLitePlugin extends ReactContextBaseJavaModule implements Applicat
                 } catch (IOException ignored) {
                 }
             }
+        }
+    }
 
+    /**
+     * If a prepopulated DB file exists in the assets folder it is copied to the dbPath.
+     * Only runs the first time the app runs.
+     *
+     * @param dbName The name of the database file - could be used as filename for imported asset
+     * @param dbfile The File of the destination db
+     * @param assetFileInputStream input file stream for pre-populated db asset
+     */
+    private void createFromAssets(String dbName, File dbfile, InputStream assetFileInputStream) {
+        OutputStream out = null;
+
+        try {
+            Log.v("info", "Copying pre-populated DB content");
+            String dbPath = dbfile.getAbsolutePath();
+            dbPath = dbPath.substring(0, dbPath.lastIndexOf("/") + 1);
+
+            File dbPathFile = new File(dbPath);
+            if (!dbPathFile.exists())
+                dbPathFile.mkdirs();
+
+            File newDbFile = new File(dbPath + dbName);
+            out = new FileOutputStream(newDbFile);
+
+            // XXX TODO: this is very primitive, other alternatives at:
+            // http://www.journaldev.com/861/4-ways-to-copy-file-in-java
+            byte[] buf = new byte[1024];
+            int len;
+            while ((len = assetFileInputStream.read(buf)) > 0)
+                out.write(buf, 0, len);
+
+            Log.v("info", "Copied pre-populated DB content to: " + newDbFile.getAbsolutePath());
+        } catch (IOException e) {
+            Log.v("createFromAssets", "No pre-populated DB found, error=" + e.getMessage());
+        } finally {
             if (out != null) {
                 try {
                     out.close();
@@ -468,8 +470,8 @@ public class SQLitePlugin extends ReactContextBaseJavaModule implements Applicat
     /**
      * Close a database (in another thread).
      *
-     * @param dbName
-     * @param cbc
+     * @param dbName - The name of the database file
+     * @param cbc - JS callback
      */
     private void closeDatabase(String dbName, CallbackContext cbc) {
         DBRunner r = dbrmap.get(dbName);
@@ -504,8 +506,8 @@ public class SQLitePlugin extends ReactContextBaseJavaModule implements Applicat
 
     /**
      *
-     * @param dbname
-     * @param cbc
+     * @param dbname - The name of the database file
+     * @param cbc - callback
      */
     private void deleteDatabase(String dbname, CallbackContext cbc) {
         DBRunner r = dbrmap.get(dbname);
@@ -537,13 +539,24 @@ public class SQLitePlugin extends ReactContextBaseJavaModule implements Applicat
      */
     @SuppressLint("NewApi")
     private boolean deleteDatabaseNow(String dbname) {
-        File dbfile = this.getActivity().getDatabasePath(dbname);
-        return deleteDatabasePreHoneycomb(dbfile);
+        File dbfile = this.getContext().getDatabasePath(dbname);
+        if (android.os.Build.VERSION.SDK_INT >= 11) {
+            // Use try & catch just in case android.os.Build.VERSION.SDK_INT >= 16 was lying:
+            try {
+                return SQLiteDatabase.deleteDatabase(dbfile);
+            } catch (Exception e) {
+                Log.e(SQLitePlugin.class.getSimpleName(), "couldn't delete because old SDK_INT", e);
+                return deleteDatabasePreHoneycomb(dbfile);
+            }
+        } else {
+            // use old API
+            return deleteDatabasePreHoneycomb(dbfile);
+        }
     }
 
     private boolean deleteDatabasePreHoneycomb(File dbfile) {
         try {
-            return this.getActivity().deleteDatabase(dbfile.getAbsolutePath());
+            return this.getContext().deleteDatabase(dbfile.getAbsolutePath());
         } catch (Exception e) {
             Log.e(SQLitePlugin.class.getSimpleName(), "couldn't delete database", e);
             return false;
@@ -665,9 +678,6 @@ public class SQLitePlugin extends ReactContextBaseJavaModule implements Applicat
                         ex.printStackTrace();
                         errorMessage = ex.getMessage();
                         Log.v("executeSqlBatch", "SQLiteDatabase.executeInsert(): Error=" + errorMessage);
-                    }
-                    finally {
-                        myStatement.close();
                     }
                 }
 
@@ -987,18 +997,27 @@ public class SQLitePlugin extends ReactContextBaseJavaModule implements Applicat
 
     private class DBRunner implements Runnable {
         final String dbname;
-        final String dbpwd;
-        private boolean createFromAssets;
+        final int openFlags;
+        private String assetFilename;
         private boolean androidLockWorkaround;
         final BlockingQueue<DBQuery> q;
         final CallbackContext openCbc;
 
         SQLiteDatabase mydb;
 
-        DBRunner(final String dbname, final String dbpwd, JSONObject options, CallbackContext cbc) {
+        DBRunner(final String dbname, JSONObject options, CallbackContext cbc) {
             this.dbname = dbname;
-            this.dbpwd = dbpwd;
-            this.createFromAssets = options.has("createFromResource");
+            int openFlags = SQLiteDatabase.OPEN_READWRITE | SQLiteDatabase.CREATE_IF_NECESSARY;
+            try {
+                this.assetFilename = options.has("assetFilename") ? options.getString("assetFilename") : null;
+                if (this.assetFilename != null && this.assetFilename.length() > 0) {
+                    boolean readOnly = options.has("readOnly") && options.getBoolean("readOnly");
+                    openFlags = readOnly ? SQLiteDatabase.OPEN_READONLY : openFlags;
+                }
+            } catch (Exception ex){
+                Log.v(SQLitePlugin.class.getSimpleName(),"Error retrieving assetFilename this.mode from options:",ex);
+            }
+            this.openFlags = openFlags;
             this.androidLockWorkaround = options.has("androidLockWorkaround");
             if (this.androidLockWorkaround)
                 Log.v(SQLitePlugin.class.getSimpleName(), "Android db closing/locking workaround applied");
@@ -1009,7 +1028,7 @@ public class SQLitePlugin extends ReactContextBaseJavaModule implements Applicat
 
         public void run() {
             try {
-                this.mydb = openDatabase(dbname, dbpwd, this.createFromAssets, this.openCbc);
+                this.mydb = openDatabase(dbname, this.assetFilename, this.openFlags, this.openCbc);
             } catch (Exception e) {
                 Log.e(SQLitePlugin.class.getSimpleName(), "unexpected error, stopping db thread", e);
                 dbrmap.remove(dbname);
@@ -1028,7 +1047,7 @@ public class SQLitePlugin extends ReactContextBaseJavaModule implements Applicat
                     if (androidLockWorkaround && dbq.queries.length == 1 && dbq.queries[0].equals("COMMIT")) {
                         // Log.v(SQLitePlugin.class.getSimpleName(), "close and reopen db");
                         closeDatabaseNow(dbname);
-                        this.mydb = openDatabase(dbname, dbpwd, false, null);
+                        this.mydb = openDatabase(dbname, "", this.openFlags, null);
                         // Log.v(SQLitePlugin.class.getSimpleName(), "close and reopen db finished");
                     }
 
@@ -1111,15 +1130,16 @@ public class SQLitePlugin extends ReactContextBaseJavaModule implements Applicat
         }
     }
 
-    private static enum Action {
+    private enum Action {
         open,
         close,
         delete,
         executeSqlBatch,
         backgroundExecuteSqlBatch,
+        echoStringValue
     }
 
-    private static enum QueryType {
+    private enum QueryType {
         update,
         insert,
         delete,
