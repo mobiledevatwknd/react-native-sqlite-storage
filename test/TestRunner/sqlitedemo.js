@@ -11,19 +11,19 @@
  */
 'use strict';
 
-var React = require('react-native');
-var SQLite = require('react-native-sqlcipher-storage');
+import SQLite from 'react-native-sqlcipher-storage';
 SQLite.DEBUG(true);
 SQLite.enablePromise(true);
 
-var {
+import React from 'react';
+import  {
   AppRegistry,
   StyleSheet,
   Text,
   View,
   ListView,
   TouchableOpacity
-} = React;
+} from 'react-native';
 
 var database_name = "Test.db";
 var database_key = "password";
@@ -134,8 +134,8 @@ export default React.createClass({
         tx.executeSql('INSERT INTO Offices (name, longtitude, latitude) VALUES ("Berlin", 35.3, 12.1);');
         tx.executeSql('INSERT INTO Offices (name, longtitude, latitude) VALUES ("Paris", 10.7, 14.1);');
 
-        tx.executeSql('INSERT INTO Employees (name, office, department) VALUES ("Sylvester Stallone", 2,  4);');
-        tx.executeSql('INSERT INTO Employees (name, office, department) VALUES ("Elvis Presley", 2, 4);');
+        tx.executeSql('INSERT INTO Employees (name, office, department) VALUES (?,?,?);', ["Sylvester Stallone", 2, 4]);
+        tx.executeSql('INSERT INTO Employees (name, office, department) VALUES (?,?,?);', ["Elvis Presley", 2, 4]);
         tx.executeSql('INSERT INTO Employees (name, office, department) VALUES ("Leslie Nelson", 3,  4);');
         tx.executeSql('INSERT INTO Employees (name, office, department) VALUES ("Fidel Castro", 3, 3);');
         tx.executeSql('INSERT INTO Employees (name, office, department) VALUES ("Bill Clinton", 1, 3);');
@@ -313,4 +313,3 @@ var styles = StyleSheet.create({
       flex: 1
   }
 });
-

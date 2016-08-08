@@ -7,8 +7,10 @@
     "postinstall": "cd node_modules/react-native/packager && patch -N < ../../../mods.diff || exit 0"
   },
   "dependencies": {
-    "react-native": "^0.21.0",
+    "react": "^15.1.0",
+    "react-native": "^0.28.0-rc.0",
     "react-native-sqlcipher-storage": "file:../../",
+    "react-native-windows": "^0.28.0-rc.1",
     "react-native-winjs": "^0.1.1"
   },
   "devDependencies": {
@@ -16,6 +18,7 @@
     "haste-resolver-webpack-plugin": "^0.1.2",
     "json-loader": "^0.5.2",
     "react-hot-loader": "^1.2.7",
+    "rnpm-plugin-windows": "^0.1.1",
     "script-loader": "^0.6.1",
     "webpack": "^1.12.10",
     "webpack-dev-server": "^1.14.0",

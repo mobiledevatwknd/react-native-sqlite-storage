@@ -119,7 +119,7 @@ namespace SQLite3 {
 	  OutputDebugString(L"In open async with key\n");
 
 	  // Need to remember the current thread for later callbacks into JS
-	  CoreDispatcher^ dispatcher = CoreWindow::GetForCurrentThread()->Dispatcher;
+	  CoreDispatcher^ dispatcher = CoreWindow::GetForCurrentThread() ? CoreWindow::GetForCurrentThread()->Dispatcher : nullptr;
 
 	  return Concurrency::create_async([dbPath, key, dispatcher]() {
 		  OutputDebugString(L"In Async Task to create database\n");

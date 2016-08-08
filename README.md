@@ -210,3 +210,5 @@ https://github.com/litehelpers/Cordova-sqlite-storage
 https://github.com/litehelpers/Cordova-sqlcipher-adapter
 
 The issues and limitations for the actual SQLite can be found on these sites.
+
+https://msdn.microsoft.com/en-us/windows/uwp/debug-test-perf/windows-runtime-components-and-optimizing-interop
