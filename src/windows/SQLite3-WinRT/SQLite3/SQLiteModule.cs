@@ -66,10 +66,11 @@ namespace ReactNative.Modules.SQLite
         {
             try
             {
-                string dbname = config.Value<string>("name") ?? "";
+                string dbname = config.Value<string>("path") ?? "";
                 Database db = databases[dbname];
                 db.closedb();
                 databases.Remove(dbname);
+                doneCallback.Invoke();
             }
             catch(Exception e)
             {
