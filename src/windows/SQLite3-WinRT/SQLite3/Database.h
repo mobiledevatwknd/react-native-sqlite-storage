@@ -2,6 +2,7 @@
 
 #include "sqlite3.h"
 #include "Common.h"
+#include <mutex>
 
 namespace SQLite3 {
   public value struct ChangeEvent {
@@ -159,5 +160,6 @@ namespace SQLite3 {
     int changeHandlers;
     void addChangeHandler(int& handlerCount);
     void removeChangeHandler(int& handlerCount);
+	std::mutex m_mutex;
   };
 }

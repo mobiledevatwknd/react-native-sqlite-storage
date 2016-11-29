@@ -8,6 +8,8 @@
 
 #include "Database.h"
 #include "Statement.h"
+#include <iostream>
+
 
 using Windows::UI::Core::CoreDispatcher;
 using Windows::UI::Core::CoreDispatcherPriority;
@@ -176,6 +178,7 @@ namespace SQLite3 {
   }
 
   int Database::closedb() {
+	  std::lock_guard<std::mutex> lock(m_mutex);
 	  return sqlite3_close_v2(sqlite);
   }
 
@@ -269,12 +272,14 @@ namespace SQLite3 {
   IAsyncOperation<int>^ Database::RunAsync(Platform::String^ sql, ParameterContainer params) {
     return Concurrency::create_async([this, sql, params] {
       try {
+		std::lock_guard<std::mutex> lock(m_mutex);
         StatementPtr statement = PrepareAndBind(sql, params);
         statement->Run();
         return sqlite3_changes(sqlite);
       } catch (Platform::Exception^ e) {
         saveLastErrorMessage();
-        throw;
+		std::wcout << std::wstring(e->Message->Data()) << " " << e->HResult << lastErrorMessage;
+		throw;
       }
     });
   }
@@ -291,11 +296,13 @@ namespace SQLite3 {
   IAsyncOperation<Platform::String^>^ Database::OneAsync(Platform::String^ sql, ParameterContainer params) {
     return Concurrency::create_async([this, sql, params]() {
       try {
+		std::lock_guard<std::mutex> lock(m_mutex);
         StatementPtr statement = PrepareAndBind(sql, params);
         return statement->One();
       } catch (Platform::Exception^ e) {
         saveLastErrorMessage();
-        throw;
+		std::wcout << std::wstring(e->Message->Data()) << " " << e->HResult << lastErrorMessage;
+		throw;
       }
     });
   }
@@ -312,11 +319,13 @@ namespace SQLite3 {
   IAsyncOperation<Platform::String^>^ Database::AllAsync(Platform::String^ sql, ParameterContainer params) {
     return Concurrency::create_async([this, sql, params]() {
       try {
+		std::lock_guard<std::mutex> lock(m_mutex);
         StatementPtr statement = PrepareAndBind(sql, params);
         return statement->All();
       } catch (Platform::Exception^ e) {
         saveLastErrorMessage();
-        throw;
+		std::wcout << std::wstring(e->Message->Data()) << " " << e->HResult << lastErrorMessage;
+		throw;
       }
     });
   }
@@ -333,11 +342,13 @@ namespace SQLite3 {
   IAsyncAction^ Database::EachAsync(Platform::String^ sql, ParameterContainer params, EachCallback^ callback) {
     return Concurrency::create_async([this, sql, params, callback] {
       try {
+		std::lock_guard<std::mutex> lock(m_mutex);
         StatementPtr statement = PrepareAndBind(sql, params);
         statement->Each(callback, dispatcher);
       } catch (Platform::Exception^ e) {
         saveLastErrorMessage();
-        throw;
+		std::wcout << std::wstring(e->Message->Data()) << " " << e->HResult << lastErrorMessage;
+		throw;
       }
     });
   }
@@ -350,6 +361,7 @@ namespace SQLite3 {
   }
 
   void Database::saveLastErrorMessage() {
+	std::lock_guard < std::mutex> lock(m_mutex);
     if (sqlite3_errcode(sqlite) != SQLITE_OK) {
       lastErrorMessage = (WCHAR*)sqlite3_errmsg16(sqlite);
     } else {

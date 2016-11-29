@@ -14,6 +14,7 @@ namespace ReactNative.Modules.SQLite
         static string version;
         static Dictionary<string, Database> databases = new Dictionary<string, Database>();
 
+
         public SQLiteModule(ReactContext reactContext) : base(reactContext)
         {
 
@@ -44,16 +45,17 @@ namespace ReactNative.Modules.SQLite
                 Database db = await Database.OpenAsyncWithKey(opendbname, key);
                 if (version == null)
                 {
-                    JObject result = JObject.Parse( await db.OneAsyncVector("SELECT sqlite_version() || ' (' || sqlite_source_id() || ')' as version", new List<string>()));
+                    JObject result = JObject.Parse(await db.OneAsyncVector("SELECT sqlite_version() || ' (' || sqlite_source_id() || ')' as version", new List<string>()));
                     version = result.Value<string>("version");
                 }
                 databases[dbname] = db;
                 doneCallback.Invoke();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 errorCallback.Invoke(e.Message);
             }
+
 
         }
 
@@ -64,6 +66,7 @@ namespace ReactNative.Modules.SQLite
             ICallback errorCallback
         )
         {
+
             try
             {
                 string dbname = config.Value<string>("path") ?? "";
@@ -72,11 +75,13 @@ namespace ReactNative.Modules.SQLite
                 databases.Remove(dbname);
                 doneCallback.Invoke();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 errorCallback.Invoke(e.Message);
             }
+
         }
+
 
         [ReactMethod]
         public async void backgroundExecuteSqlBatch(
@@ -85,15 +90,23 @@ namespace ReactNative.Modules.SQLite
             ICallback errorCallback
         )
         {
+
             try
             {
+
                 string dbname = config.Value<JObject>("dbargs").Value<string>("dbname") ?? "";
+
+                if (!databases.Keys.Contains(dbname))
+                {
+                    throw new Exception("Database does not exist");
+                }
                 JArray executes = config.Value<JArray>("executes");
                 Database db = databases[dbname];
+
                 JArray results = new JArray();
                 long totalChanges = db.TotalChanges;
                 string q = "";
-                foreach( JObject e in executes)
+                foreach (JObject e in executes)
                 {
                     try
                     {
@@ -113,7 +126,7 @@ namespace ReactNative.Modules.SQLite
                         resultInfo["result"] = result;
                         results.Add(resultInfo);
                     }
-                    catch( Exception err)
+                    catch (Exception err)
                     {
                         JObject resultInfo = new JObject();
                         JObject result = new JObject();
@@ -124,15 +137,15 @@ namespace ReactNative.Modules.SQLite
                         resultInfo["result"] = result;
                         results.Add(resultInfo);
                     }
-
-
                 }
                 doneCallback.Invoke(results);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 errorCallback.Invoke(e.Message);
             }
+            finally { }
+
         }
 
         [ReactMethod]
@@ -141,6 +154,7 @@ namespace ReactNative.Modules.SQLite
             ICallback doneCallback,
             ICallback errorCallback)
         {
+
             try
             {
                 string dbname = config.Value<string>("path") ?? "";
@@ -150,14 +164,15 @@ namespace ReactNative.Modules.SQLite
                     db.closedb();
                     databases.Remove(dbname);
                 }
-                StorageFile file = await Windows.Storage.ApplicationData.Current.LocalFolder.GetFileAsync(dbname);
-                await file.DeleteAsync(Windows.Storage.StorageDeleteOption.PermanentDelete);
+                StorageFile file = await ApplicationData.Current.LocalFolder.GetFileAsync(dbname);
+                await file.DeleteAsync(StorageDeleteOption.PermanentDelete);
                 doneCallback.Invoke();
             }
             catch (Exception err)
             {
                 errorCallback.Invoke(err.Message);
             }
+            finally { }
         }
 
 
