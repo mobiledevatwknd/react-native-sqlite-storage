@@ -136,7 +136,7 @@ namespace SQLite3 {
 		  }
 		  std::wstring wkey(key->Begin(), key->End());
 		  std::string skey(wkey.begin(), wkey.end());
-		  if ((ret = sqlite3_key(sqlite, skey.c_str(), skey.length())) != SQLITE_OK)
+		  if ((ret = sqlite3_key(sqlite, skey.c_str(), int(skey.length()))) != SQLITE_OK)
 		  {
 			  OutputDebugString(L"Failed to set key\n");
 			  sqlite3_close(sqlite);
@@ -181,11 +181,9 @@ namespace SQLite3 {
 
   int Database::closedb() {
 	  std::lock_guard<std::mutex> lock(m_mutex);
-	  if (sqlite)
-	  {
-		  return sqlite3_close_v2(sqlite);
-		  sqlite = 0;
-	  }
+	  auto res = sqlite3_close(sqlite);
+	  sqlite = 0;
+	  return res;
   }
 
   void Database::addChangeHandler(int& handlerCount) {

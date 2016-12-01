@@ -11,10 +11,11 @@ using System.Diagnostics;
 
 namespace ReactNative.Modules.SQLite
 {
-    public class SQLiteModule : ReactContextNativeModuleBase
+    public class SQLiteModule : ReactContextNativeModuleBase, ILifecycleEventListener
     {
         static string version;
         static Dictionary<string, Database> databases = new Dictionary<string, Database>();
+        static Dictionary<string, string> databaseKeys = new Dictionary<string, string>();
 
 
         public SQLiteModule(ReactContext reactContext) : base(reactContext)
@@ -51,6 +52,7 @@ namespace ReactNative.Modules.SQLite
                     version = result.Value<string>("version");
                 }
                 databases[dbname] = db;
+                databaseKeys[dbname] = key;
                 doneCallback.Invoke();
                 //Debug.WriteLine("Opened database");
 
@@ -78,6 +80,7 @@ namespace ReactNative.Modules.SQLite
                 Database db = databases[dbname];
                 db.closedb();
                 databases.Remove(dbname);
+                databaseKeys.Remove(dbname);
                 doneCallback.Invoke();
                 //Debug.WriteLine("Closed Database");
             }
@@ -172,6 +175,7 @@ namespace ReactNative.Modules.SQLite
                     Database db = databases[dbname];
                     db.closedb();
                     databases.Remove(dbname);
+                    databaseKeys.Remove(dbname);
                 }
                 StorageFile file = await ApplicationData.Current.LocalFolder.GetFileAsync(dbname);
                 await file.DeleteAsync(StorageDeleteOption.PermanentDelete);
@@ -186,7 +190,51 @@ namespace ReactNative.Modules.SQLite
             finally { }
         }
 
+        public void OnSuspend()
+        {
+            OnDestroy();
+        }
 
+        public async void OnResume()
+        {
+            try
+            {
+                foreach (KeyValuePair<String, String> entry in databaseKeys)
+                {
+                    string opendbname = ApplicationData.Current.LocalFolder.Path + "\\" + entry.Key;
+                    Database db = await Database.OpenAsyncWithKey(opendbname, entry.Value);
+                    if (version == null)
+                    {
+                        JObject result = JObject.Parse(await db.OneAsyncVector("SELECT sqlite_version() || ' (' || sqlite_source_id() || ')' as version", new List<string>()));
+                        version = result.Value<string>("version");
+                    }
+                    databases[entry.Key] = db;
+
+                }
+            }
+            catch(Exception e)
+            {
+                Debug.WriteLine("Failed to restore database" + e.ToString());
+            }
+            
+        }
+
+        public void OnDestroy()
+        {
+            // close all databases
+            foreach( KeyValuePair<String, Database> entry in databases)
+            {
+                entry.Value.closedb();
+            }
+            databases.Clear();
+
+        }
+
+        public override void Initialize()
+        {
+            base.Initialize();
+            Context.AddLifecycleEventListener(this);
+        }
     }
 
     public class SQLiteReactPackage : IReactPackage
