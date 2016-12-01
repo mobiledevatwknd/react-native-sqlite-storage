@@ -19,6 +19,7 @@ using Windows::UI::Core::DispatchedHandler;
 using Windows::Foundation::IAsyncAction;
 using Windows::Foundation::IAsyncOperation;
 
+
 namespace SQLite3 {
   static int WinLocaleCollateUtf16(void *data, int str1Length, const void* str1Data, int str2Length, const void* str2Data) {
     Database^ db = reinterpret_cast<Database^>(data);
@@ -140,17 +141,18 @@ namespace SQLite3 {
 			  OutputDebugString(L"Failed to set key\n");
 			  sqlite3_close(sqlite);
 			  throwSQLiteError(ret, dbPath);
-      }
-      if (sqlite3_exec(sqlite, "SELECT count(*) FROM sqlite_master;", NULL, NULL, NULL) != SQLITE_OK) {
-        //bad key
-        OutputDebugString(L"Failed to set key\n");
-        sqlite3_close(sqlite);
+		  }
+		  if (sqlite3_exec(sqlite, "SELECT count(*) FROM sqlite_master;", NULL, NULL, NULL) != SQLITE_OK) {
+			//bad key
+			OutputDebugString(L"Failed to set key\n");
+			sqlite3_close(sqlite);
   			throwSQLiteError(ret, dbPath);
+			  
 		  }
 
 		  OutputDebugString(L"Returning database\n");
 		  return ref new Database(sqlite, dispatcher);
-
+  
 	  });
   }
 
@@ -179,7 +181,11 @@ namespace SQLite3 {
 
   int Database::closedb() {
 	  std::lock_guard<std::mutex> lock(m_mutex);
-	  return sqlite3_close_v2(sqlite);
+	  if (sqlite)
+	  {
+		  return sqlite3_close_v2(sqlite);
+		  sqlite = 0;
+	  }
   }
 
   void Database::addChangeHandler(int& handlerCount) {
@@ -278,7 +284,6 @@ namespace SQLite3 {
         return sqlite3_changes(sqlite);
       } catch (Platform::Exception^ e) {
         saveLastErrorMessage();
-		std::wcout << std::wstring(e->Message->Data()) << " " << e->HResult << lastErrorMessage;
 		throw;
       }
     });
@@ -301,7 +306,6 @@ namespace SQLite3 {
         return statement->One();
       } catch (Platform::Exception^ e) {
         saveLastErrorMessage();
-		std::wcout << std::wstring(e->Message->Data()) << " " << e->HResult << lastErrorMessage;
 		throw;
       }
     });
@@ -324,9 +328,11 @@ namespace SQLite3 {
         return statement->All();
       } catch (Platform::Exception^ e) {
         saveLastErrorMessage();
-		std::wcout << std::wstring(e->Message->Data()) << " " << e->HResult << lastErrorMessage;
 		throw;
       }
+	  catch (...) {
+		  throw;
+	  }
     });
   }
 
@@ -347,7 +353,6 @@ namespace SQLite3 {
         statement->Each(callback, dispatcher);
       } catch (Platform::Exception^ e) {
         saveLastErrorMessage();
-		std::wcout << std::wstring(e->Message->Data()) << " " << e->HResult << lastErrorMessage;
 		throw;
       }
     });
@@ -364,6 +369,7 @@ namespace SQLite3 {
 	std::lock_guard < std::mutex> lock(m_mutex);
     if (sqlite3_errcode(sqlite) != SQLITE_OK) {
       lastErrorMessage = (WCHAR*)sqlite3_errmsg16(sqlite);
+	  std::wcout << "Setting last error message to" << lastErrorMessage << "\n";
     } else {
       lastErrorMessage.clear();
     }

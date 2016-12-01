@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Collections.Generic;
 using System.Linq;
 using ReactNative.Bridge;
@@ -6,6 +7,7 @@ using Newtonsoft.Json.Linq;
 using Windows.Storage;
 using SQLite3;
 using ReactNative.Modules.Core;
+using System.Diagnostics;
 
 namespace ReactNative.Modules.SQLite
 {
@@ -50,10 +52,13 @@ namespace ReactNative.Modules.SQLite
                 }
                 databases[dbname] = db;
                 doneCallback.Invoke();
+                //Debug.WriteLine("Opened database");
+
             }
             catch (Exception e)
             {
                 errorCallback.Invoke(e.Message);
+                Debug.WriteLine("Open database failed " + e.ToString());
             }
 
 
@@ -74,10 +79,12 @@ namespace ReactNative.Modules.SQLite
                 db.closedb();
                 databases.Remove(dbname);
                 doneCallback.Invoke();
+                //Debug.WriteLine("Closed Database");
             }
             catch (Exception e)
             {
                 errorCallback.Invoke(e.Message);
+                Debug.WriteLine("Close database failed " + e.ToString());
             }
 
         }
@@ -139,10 +146,12 @@ namespace ReactNative.Modules.SQLite
                     }
                 }
                 doneCallback.Invoke(results);
+                //Debug.WriteLine("Done Execute Sql Batch");
             }
             catch (Exception e)
             {
                 errorCallback.Invoke(e.Message);
+                Debug.WriteLine("Error in background execute Sql batch" + e.ToString());
             }
             finally { }
 
@@ -167,10 +176,12 @@ namespace ReactNative.Modules.SQLite
                 StorageFile file = await ApplicationData.Current.LocalFolder.GetFileAsync(dbname);
                 await file.DeleteAsync(StorageDeleteOption.PermanentDelete);
                 doneCallback.Invoke();
+                //Debug.WriteLine("Deleted database");
             }
             catch (Exception err)
             {
                 errorCallback.Invoke(err.Message);
+                Debug.WriteLine("Error in Delete Database " + err.ToString());
             }
             finally { }
         }
