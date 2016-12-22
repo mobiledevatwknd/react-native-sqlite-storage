@@ -8,6 +8,8 @@ using Windows.Storage;
 using SQLite3;
 using ReactNative.Modules.Core;
 using System.Diagnostics;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace ReactNative.Modules.SQLite
 {
@@ -106,10 +108,25 @@ namespace ReactNative.Modules.SQLite
 
                 string dbname = config.Value<JObject>("dbargs").Value<string>("dbname") ?? "";
 
-                if (!databases.Keys.Contains(dbname))
+                if (!databaseKeys.Keys.Contains(dbname))
                 {
                     throw new Exception("Database does not exist");
                 }
+                if (!databases.Keys.Contains(dbname))
+                {
+
+                    try {
+                        await reOpenDatabases();
+                        if (!databases.Keys.Contains(dbname))
+                        {
+                            throw new Exception("Resume Didn't Work");
+                        }
+                    }
+                        catch (Exception e) {
+                        throw new Exception("Failed to reopendatabase" + e.ToString());
+                    }
+                }
+
                 JArray executes = config.Value<JArray>("executes");
                 Database db = databases[dbname];
 
@@ -197,26 +214,7 @@ namespace ReactNative.Modules.SQLite
 
         public async void OnResume()
         {
-            try
-            {
-                foreach (KeyValuePair<String, String> entry in databaseKeys)
-                {
-                    string opendbname = ApplicationData.Current.LocalFolder.Path + "\\" + entry.Key;
-                    Database db = await Database.OpenAsyncWithKey(opendbname, entry.Value);
-                    if (version == null)
-                    {
-                        JObject result = JObject.Parse(await db.OneAsyncVector("SELECT sqlite_version() || ' (' || sqlite_source_id() || ')' as version", new List<string>()));
-                        version = result.Value<string>("version");
-                    }
-                    databases[entry.Key] = db;
-
-                }
-            }
-            catch(Exception e)
-            {
-                Debug.WriteLine("Failed to restore database" + e.ToString());
-            }
-            
+            await reOpenDatabases()
         }
 
         public void OnDestroy()
@@ -234,6 +232,34 @@ namespace ReactNative.Modules.SQLite
         {
             base.Initialize();
             Context.AddLifecycleEventListener(this);
+        }
+
+        async Task reOpenDatabases()
+        {
+            try
+            {
+                foreach (KeyValuePair<String, String> entry in databaseKeys)
+                {
+                    string opendbname = ApplicationData.Current.LocalFolder.Path + "\\" + entry.Key;
+                    FileInfo fInfo = new FileInfo(opendbname);
+                    if (!fInfo.Exists)
+                    {
+                        throw new Exception(opendbname + " not found");
+                    }
+                    Database db = await Database.OpenAsyncWithKey(opendbname, entry.Value);
+                    if (version == null)
+                    {
+                        JObject result = JObject.Parse(await db.OneAsyncVector("SELECT sqlite_version() || ' (' || sqlite_source_id() || ')' as version", new List<string>()));
+                        version = result.Value<string>("version");
+                    }
+                    databases[entry.Key] = db;
+
+                }
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Failed to restore database" + e.ToString());
+            }
         }
     }
 
