@@ -214,7 +214,7 @@ namespace ReactNative.Modules.SQLite
 
         public async void OnResume()
         {
-            await reOpenDatabases()
+            await reOpenDatabases();
         }
 
         public void OnDestroy()
