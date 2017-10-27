@@ -147,6 +147,7 @@ namespace ReactNative.Modules.SQLite
                         JObject result = new JObject();
                         result["rowsAffected"] = rowsAffected;
                         result["rows"] = rows;
+                        result["insertId"] = db.LastInsertRowId;
                         JObject resultInfo = new JObject();
                         resultInfo["type"] = "success";
                         resultInfo["qid"] = q;
