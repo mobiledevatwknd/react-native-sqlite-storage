@@ -638,6 +638,11 @@ public class SQLitePlugin extends ReactContextBaseJavaModule {
                             // Assuming SDK_INT was lying & method not found:
                             // do nothing here & try again with raw query.
                         }
+                        finally {
+                            if (myStatement != null) {
+                                myStatement.close();
+                            }
+                        }
 
                         if (rowsAffected != -1) {
                             queryResult = new JSONObject();
