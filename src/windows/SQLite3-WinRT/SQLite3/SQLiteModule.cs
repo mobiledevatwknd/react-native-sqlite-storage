@@ -115,19 +115,27 @@ namespace ReactNative.Modules.SQLite
                 if (!databases.Keys.Contains(dbname))
                 {
 
-                    try {
+                    try
+                    {
                         await reOpenDatabases();
                         if (!databases.Keys.Contains(dbname))
                         {
                             throw new Exception("Resume Didn't Work");
                         }
                     }
-                        catch (Exception e) {
+                    catch (Exception e)
+                    {
                         throw new Exception("Failed to reopendatabase" + e.ToString());
                     }
                 }
 
-                JArray executes = config.Value<JArray>("executes");
+                string executesBase64 = config.Value<string>("executes");
+                byte[] data = Convert.FromBase64String(executesBase64);
+                string executesBase64Decoded = Encoding.UTF8.GetString(data);
+                JsonReader reader = new JsonTextReader(new StringReader(executesBase64Decoded));
+                reader.DateParseHandling = DateParseHandling.None;
+                JArray executes = JArray.Load(reader);
+
                 Database db = databases[dbname];
 
                 JArray results = new JArray();
@@ -221,7 +229,7 @@ namespace ReactNative.Modules.SQLite
         public void OnDestroy()
         {
             // close all databases
-            foreach( KeyValuePair<String, Database> entry in databases)
+            foreach (KeyValuePair<String, Database> entry in databases)
             {
                 entry.Value.closedb();
             }
