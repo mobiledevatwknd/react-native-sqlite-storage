@@ -3,6 +3,7 @@ using System.Threading;
 using System.Collections.Generic;
 using System.Linq;
 using ReactNative.Bridge;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Windows.Storage;
 using SQLite3;
@@ -10,6 +11,7 @@ using ReactNative.Modules.Core;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
+using System.Text;
 
 namespace ReactNative.Modules.SQLite
 {
