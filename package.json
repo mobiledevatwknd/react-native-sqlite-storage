@@ -29,9 +29,7 @@
   },
   "homepage": "https://github.com/axsy-dev/react-native-sqlcipher-storage",
   "peerDependencies": {
-    "react-native": ">=0.40.0"
-  },
-  "dependencies": {
+    "react-native": ">=0.40.0",
     "base-64": "^0.1.0"
   }
 }
