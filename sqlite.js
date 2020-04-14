@@ -7,13 +7,11 @@
  * This library is available under the terms of the MIT License (2008).
  * See http://opensource.org/licenses/alphabetical for full text.
  */
-var plugin = require('./lib/sqlite.core.js');
-var {SQLiteFactory} = plugin;
+
+import plugin, { SQLiteFactory } from "./lib/sqlite.core.js";
 
 var config = [
-
   // meaning: [returnValueExpected,prototype,fn,argsNeedPadding,reverseCallbacks,rejectOnError]
-
   [false,"SQLitePlugin","transaction",false,true,true],
   [false,"SQLitePlugin","readTransaction",false,true,true],
   [false,"SQLitePlugin","close",false,false,true],
@@ -29,18 +27,19 @@ var config = [
 
 var originalFns = {};
 config.forEach(entry => {
-  let [returnValueExpected,prototype,fn]= entry;
+  let [returnValueExpected, prototype, fn] = entry;
   let originalFn = plugin[prototype].prototype[fn];
   originalFns[prototype + "." + fn] = originalFn;
 });
 
-function enablePromiseRuntime(enable){
-  if (enable){
+function enablePromiseRuntime(enable) {
+  if (enable) {
     createPromiseRuntime();
   } else {
     createCallbackRuntime();
   }
 }
+
 function createCallbackRuntime() {
   config.forEach(entry => {
     let [returnValueExpected,prototype,fn,argsNeedPadding,reverseCallbacks,rejectOnError]= entry;
@@ -74,12 +73,14 @@ function createPromiseRuntime() {
           return resolve(retValue);
         }
       });
-
       return promise;
-    }
+    };
   });
+
   plugin.log("Promise based runtime ready");
 }
+
+
 SQLiteFactory.prototype.enablePromise = enablePromiseRuntime;
 
 module.exports = new SQLiteFactory();

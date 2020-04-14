@@ -1,6 +1,6 @@
 {
   "name": "react-native-sqlite-storage",
-  "version": "5.0.0",
+  "version": "5.0.2",
   "description": "SQLite3 bindings for React Native (Android & iOS)",
   "main": "sqlite.js",
   "scripts": {
@@ -8,10 +8,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/andpor/react-native-sqlite-storage.git"
+    "url": "https://github.com/axsy-dev/react-native-sqlcipher-storage.git"
   },
   "keywords": [
-    "react-native-sqlite-storage",
+    "react-native-sqlcipher-storage",
     "react-native-sqlite",
     "react-component",
     "reactnative",
@@ -21,15 +21,17 @@
     "ios",
     "android",
     "promise",
-    "cordova-sqlite-storage"
+    "cordova-sqlcipher-adapter"
   ],
-  "author": "Andrzej Porebski",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/andpor/react-native-sqlite-storage/issues"
+    "url": "https://github.com/andpor/react-native-sqlcipher-storage/issues"
   },
-  "homepage": "https://github.com/andpor/react-native-sqlite-storage",
+  "homepage": "https://github.com/axsy-dev/react-native-sqlcipher-storage",
   "peerDependencies": {
-    "react-native": ">=0.14.0"
+    "react-native": ">=0.40.0"
+  },
+  "dependencies": {
+    "base-64": "^0.1.0"
   }
 }
