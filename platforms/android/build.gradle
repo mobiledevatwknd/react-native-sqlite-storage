@@ -39,5 +39,6 @@ repositories {
 }
 
 dependencies {
+    implementation 'com.github.dryganets:sqlite-adapter:0.0.1'
     implementation 'com.facebook.react:react-native:+'
 }
