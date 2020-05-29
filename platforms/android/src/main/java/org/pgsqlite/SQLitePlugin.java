@@ -679,7 +679,7 @@ public class SQLitePlugin extends ReactContextBaseJavaModule {
 
                         queryResult = Arguments.createMap();
                         queryResult.putInt("rowsAffected", 0);
-                    } catch (SQLiteException ex) {
+                    } catch (Exception ex) {
                         errorMessage = ex.getMessage();
                         FLog.e(TAG, "SQLiteDatabase.beginTransaction() failed", ex);
                     }
