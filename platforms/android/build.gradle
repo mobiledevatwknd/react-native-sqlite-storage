@@ -40,5 +40,11 @@ repositories {
 
 dependencies {
     implementation 'com.github.dryganets:sqlite-adapter:0.0.1'
+    implementation ('com.github.dryganets:sqlite-adapter-cipher:0.0.1') {
+        exclude module: 'sqlite-adapter'
+        exclude group: "net.zetetic",
+        module: 'android-database-sqlcipher'
+    }
+    implementation 'net.zetetic:android-database-sqlcipher:4.1.3@aar'
     implementation 'com.facebook.react:react-native:+'
 }

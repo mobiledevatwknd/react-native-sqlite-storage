@@ -15,6 +15,8 @@ import com.facebook.react.uimanager.ViewManager;
 import com.github.dryganets.sqlite.adapter.DatabaseConnectionProvider;
 import com.github.dryganets.sqlite.adapter.DefaultConnectionProvider;
 
+import com.github.dryganets.adapter.cipher.SqliteCipherConnectionProvider;
+
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -24,8 +26,8 @@ public class SQLitePluginPackage implements ReactPackage {
     private final DatabaseConnectionProvider provider;
 
     public SQLitePluginPackage() {
-      // Standard Android implementation is used by default
-      this(new DefaultConnectionProvider());
+        // Standard Android implementation is used by default
+        this(new DefaultConnectionProvider());
     }
 
     public SQLitePluginPackage(DatabaseConnectionProvider provider) {
@@ -37,7 +39,8 @@ public class SQLitePluginPackage implements ReactPackage {
                                 ReactApplicationContext reactContext) {
       List<NativeModule> modules = new ArrayList<>();
 
-      modules.add(new SQLitePlugin(reactContext, this.provider));
+      //  modules.add(new SQLitePlugin(reactContext, this.provider));
+      modules.add(new SQLitePlugin(reactContext, new SqliteCipherConnectionProvider(reactContext)));
 
       return modules;
     }
