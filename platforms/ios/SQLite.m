@@ -226,7 +226,7 @@ RCT_EXPORT_METHOD(open: (NSDictionary *) options success:(RCTResponseSenderBlock
           sqlite3_create_function(db, "regexp", 2, SQLITE_ANY, NULL, &sqlite_regexp, NULL, NULL);
           const char *key = NULL;
           
-#ifdef SQLCIPHER
+
           NSString *dbkey = options[@"key"];
           if (dbkey != NULL) {
             key = [dbkey UTF8String];
@@ -234,7 +234,7 @@ RCT_EXPORT_METHOD(open: (NSDictionary *) options success:(RCTResponseSenderBlock
               sqlite3_key(db, key, strlen(key));
             }
           }
-#endif
+
 
           sqlite3_exec(db, "PRAGMA journal_mode=WAL;", NULL, NULL, NULL);
 

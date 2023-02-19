@@ -1,3 +1,18 @@
+# Encrypted react-native-sqlite-storage
+This fork integrates [SQLCipher](https://www.zetetic.net/sqlcipher/open-source/) into react-native-sqlite-storage library. Open db connection like below
+
+```
+    SQLite.openDatabase({
+      name: 'my.db',
+      location: 'default',
+      key: 'my-secret-db-password'
+    }, (instance) => {
+      resolve(instance);
+    }, (error) => {
+      console.log('DB Error', error);
+    });
+```
+
 # react-native-sqlite-storage
 SQLite3 Native Plugin for React Native for both Android (Classic and Native), iOS and Windows
 
