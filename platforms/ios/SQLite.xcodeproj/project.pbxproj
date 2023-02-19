@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8D599B8E1C999AAF00170CA4 /* sqlite3.c in Sources */ = {isa = PBXBuildFile; fileRef = 8D599B8C1C999AAF00170CA4 /* sqlite3.c */; };
+		8D599B8F1C999AAF00170CA4 /* sqlite3.h in Headers */ = {isa = PBXBuildFile; fileRef = 8D599B8D1C999AAF00170CA4 /* sqlite3.h */; };
 		C7DCD6E41BE0295900F3300E /* SQLite.h in Headers */ = {isa = PBXBuildFile; fileRef = C7DCD6E21BE0295900F3300E /* SQLite.h */; };
 		C7DCD6E51BE0295A00F3300E /* SQLite.m in Sources */ = {isa = PBXBuildFile; fileRef = C7DCD6E31BE0295900F3300E /* SQLite.m */; };
 		C7DCD7141BE2D5DE00F3300E /* SQLiteResult.m in Sources */ = {isa = PBXBuildFile; fileRef = C7DCD7131BE2D5DE00F3300E /* SQLiteResult.m */; };
@@ -25,6 +27,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		8D599B8C1C999AAF00170CA4 /* sqlite3.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = sqlite3.c; path = ../common/sqlite3.c; sourceTree = "<group>"; };
+		8D599B8D1C999AAF00170CA4 /* sqlite3.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sqlite3.h; path = ../common/sqlite3.h; sourceTree = "<group>"; };
 		C7DCD6E21BE0295900F3300E /* SQLite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SQLite.h; sourceTree = "<group>"; };
 		C7DCD6E31BE0295900F3300E /* SQLite.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SQLite.m; sourceTree = "<group>"; };
 		C7DCD7131BE2D5DE00F3300E /* SQLiteResult.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SQLiteResult.m; sourceTree = "<group>"; };
@@ -46,6 +50,8 @@
 		C7DCD6E11BE0293D00F3300E /* SQLite */ = {
 			isa = PBXGroup;
 			children = (
+				8D599B8C1C999AAF00170CA4 /* sqlite3.c */,
+				8D599B8D1C999AAF00170CA4 /* sqlite3.h */,
 				C7DCD6E21BE0295900F3300E /* SQLite.h */,
 				C7DCD6E31BE0295900F3300E /* SQLite.m */,
 				C7DCD7151BE2D61E00F3300E /* SQLiteResult.h */,
@@ -79,6 +85,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8D599B8F1C999AAF00170CA4 /* sqlite3.h in Headers */,
 				C7DCD6E41BE0295900F3300E /* SQLite.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -141,6 +148,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C7DCD7141BE2D5DE00F3300E /* SQLiteResult.m in Sources */,
+				8D599B8E1C999AAF00170CA4 /* sqlite3.c in Sources */,
 				C7DCD6E51BE0295A00F3300E /* SQLite.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -254,7 +262,7 @@
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = SQLite;
 				SKIP_INSTALL = YES;
-				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../../react-native/React/**";
+				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../../react-native/React/** $(SRCROOT)/../../test/TestRunner/node_modules/react-native/React/**";
 			};
 			name = Debug;
 		};
@@ -271,7 +279,7 @@
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = SQLite;
 				SKIP_INSTALL = YES;
-				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../../react-native/React/**";
+				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../../react-native/React/** $(SRCROOT)/../../test/TestRunner/node_modules/react-native/React/**";
 			};
 			name = Release;
 		};
